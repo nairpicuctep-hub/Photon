@@ -65,11 +65,28 @@ There's no build step and nothing to configure — it's plain HTML and JavaScrip
 
 ---
 
+## Install it as an app (optional)
+
+The main game is a Progressive Web App, so once it's live on GitHub Pages you can install it like a native app — its own icon, full-screen, and still working offline.
+
+**Important:** installing is only offered from the **HTTPS URL** (your GitHub Pages link). It does *not* appear when you double-click the file or view it in a preview pane.
+
+- **Desktop (Chrome / Edge):** open the Pages URL, then either tap the **Install app** button in the game's menu or click the install icon in the address bar.
+- **Android (Chrome):** open the Pages URL and tap **Install app** in the menu (or the browser's "Add to Home screen").
+- **iPhone / iPad (Safari):** open the Pages URL, tap the **Share** button, then **Add to Home Screen**. iOS never shows an automatic prompt — this is the only way, and it's normal.
+
+Double-clicking `index.html` still runs the game fine; it just can't be *installed* without HTTPS.
+
+---
+
 ## Project structure
 
 ```
 .
-├── index.html                      # Main game: Frontline of Light (the lane-battler)
+├── index.html                      # Main game: Frontline of Light (lane-battler, installable PWA)
+├── manifest.webmanifest            # PWA manifest (name, icons, colors)
+├── sw.js                           # Service worker (offline caching)
+├── icon-192.png / icon-512.png / icon.svg   # App icons
 ├── games/
 │   ├── classic-2d.html             # Light-puzzle chamber prototype
 │   └── 3d/                         # 3D arena prototype (needs internet on first load)

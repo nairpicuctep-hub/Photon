@@ -4,6 +4,14 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Radu Photon — Frontline of Light</title>
+<meta name="theme-color" content="#06070f" />
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="icon" href="icon.svg" />
+<link rel="apple-touch-icon" href="icon-192.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Radu Photon" />
 <style>
   :root{ --void:#06070f; }
   *{ box-sizing:border-box; }
@@ -649,7 +657,8 @@ function drawMenu(){
   ctx.fillStyle='#8a90c0'; ctx.font='600 14px system-ui';
   ctx.fillText('Deploy: click a card or press 1–7     ·     Pause P     ·     Mute M', W/2, 398);
   // start button
-  startBtn(); 
+  startBtn();
+  drawInstallUI();
   // little roster strip
   ctx.fillStyle='#6b7298'; ctx.font='600 13px system-ui';
   ctx.fillText('Troopers hold · Manu walls · Victor plants a turret · Floris shells · Andreea slows · Radu strikes · Pissy blinks in', W/2, H-40);
@@ -715,7 +724,7 @@ function deploy(key){ const d=LIGHT[key]; if(state!=='play') return;
   else { beep(160,0.1,'sine',120,0.15); } }
 function tap(p){
   audio();
-  if(state==='menu'){ if(inRect(p,startBtn())){ reset(); state='play'; } return; }
+  if(state==='menu'){ const ib=installRect(); if(ib && inRect(p,ib)){ onInstallTap(); return; } if(inRect(p,startBtn())){ reset(); state='play'; } return; }
   if(state==='win'||state==='lose'){ if(inRect(p,retryBtn())){ reset(); state='play'; } return; }
   if(state==='play'){ const rs=cardRects(); for(let i=0;i<rs.length;i++) if(inRect(p,rs[i])){ deploy(rs[i].key); return; } }
 }
@@ -726,6 +735,33 @@ addEventListener('keydown', e=>{ const k=e.key.toLowerCase();
   if(k==='p'){ if(state==='play') state='paused'; else if(state==='paused') state='play'; }
   if((k===' '||k==='enter')){ if(state==='menu'){ reset(); state='play'; } else if(state==='win'||state==='lose'){ reset(); state='play'; } e.preventDefault(); }
 });
+
+// ---------------------------------------------------------------- PWA install
+let deferredPrompt=null, canInstall=false, showIOSHint=false;
+const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent||'');
+function isStandalone(){ return matchMedia('(display-mode: standalone)').matches || matchMedia('(display-mode: fullscreen)').matches || navigator.standalone===true; }
+if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js').catch(()=>{}); }
+addEventListener('beforeinstallprompt', e=>{ e.preventDefault(); deferredPrompt=e; canInstall=true; });
+addEventListener('appinstalled', ()=>{ canInstall=false; deferredPrompt=null; showIOSHint=false; });
+function installRect(){ if(isStandalone()) return null; if(!(canInstall || isIOS)) return null; const w=230,h=46; return { x:W/2-w/2, y:524, w, h }; }
+async function onInstallTap(){
+  if(canInstall && deferredPrompt){ const p=deferredPrompt; deferredPrompt=null; canInstall=false; try{ p.prompt(); await p.userChoice; }catch(e){} }
+  else if(isIOS){ showIOSHint=!showIOSHint; }
+}
+function drawInstallUI(){
+  const r=installRect(); if(!r) return;
+  ctx.save();
+  ctx.strokeStyle=rgba('#5fe6ff',0.7); ctx.lineWidth=2; ctx.fillStyle='rgba(18,22,40,0.7)';
+  rr(r.x,r.y,r.w,r.h,r.h/2); ctx.fill(); ctx.stroke();
+  ctx.fillStyle='#bfefff'; ctx.font='800 16px system-ui'; ctx.textAlign='center';
+  ctx.fillText((isIOS && !canInstall) ? 'Add to Home Screen' : 'Install app', W/2, r.y+29);
+  ctx.restore();
+  if(showIOSHint){
+    ctx.fillStyle='#9aa0c8'; ctx.font='600 14px system-ui'; ctx.textAlign='center';
+    ctx.fillText('On iPhone/iPad: tap the Share button, then', W/2, r.y+r.h+26);
+    ctx.fillText('choose "Add to Home Screen".', W/2, r.y+r.h+48);
+  }
+}
 
 reset(); state='menu';
 requestAnimationFrame(frame);
