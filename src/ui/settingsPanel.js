@@ -4,7 +4,7 @@
 // reset progress — all persisted via the settings store.
 
 import { getSettings, setSetting } from '../a11y/settings.js';
-import { reset as resetSave } from '../save/save.js';
+import { reset as resetSave, setName, getName } from '../save/save.js';
 
 let panel = null;
 
@@ -50,6 +50,12 @@ export function openSettings() {
   const card = document.createElement('div');
   card.style.cssText = 'width:min(420px,90vw);background:rgba(16,18,32,.95);border:1px solid rgba(255,210,74,.3);border-radius:18px;padding:22px 26px;box-shadow:0 20px 60px rgba(0,0,0,.6)';
   card.innerHTML = '<h2 style="margin:0 0 6px;font:800 22px system-ui;color:#ffd24a">Settings</h2><p style="margin:0 0 14px;font:500 12px system-ui;color:#9aa0c8">Accessibility &amp; audio</p>';
+  const nameInput = document.createElement('input');
+  nameInput.type = 'text'; nameInput.maxLength = 16; nameInput.value = getName(); nameInput.setAttribute('aria-label', 'player name');
+  nameInput.style.cssText = 'width:150px;padding:6px 10px;border-radius:8px;border:1px solid rgba(255,210,74,.4);background:rgba(8,10,22,.85);color:#eef1ff;font:600 14px system-ui;text-align:right;outline:none';
+  nameInput.onchange = () => setName(nameInput.value);
+  nameInput.addEventListener('blur', () => setName(nameInput.value));
+  card.appendChild(row('Name', nameInput));
   card.appendChild(row('Master volume', slider('master')));
   card.appendChild(row('Music', slider('music')));
   card.appendChild(row('Sound effects', slider('sfx')));

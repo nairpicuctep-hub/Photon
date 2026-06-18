@@ -15,11 +15,12 @@ export class ModeSelectScene {
     initScene({ W: 1280, H: 720, GROUND: 566, reduce });
     setDawn(0.5);
     const best = (getSave().stats && getSave().stats.bestSurvival) || 0;
-    const cx = 640, w = 360, h = 72, gap = 18; let y = 300;
+    const cx = 640, w = 360, h = 66, gap = 16; let y = 286;
     this.buttons = [
       makeButton({ x: cx - w / 2, y, w, h, label: 'Survival', sub: best ? `Endless waves · Best ${best}` : 'Endless waves — how long can you hold?', primary: true, onClick: () => this.nav.survival() }),
       makeButton({ x: cx - w / 2, y: y + (h + gap), w, h, label: 'Boss Rush', sub: 'Umbra → Doctor Null → The Void', onClick: () => this.nav.bossRush() }),
-      makeButton({ x: 40, y: 640, w: 150, h: 46, label: '← Menu', fontSize: 16, onClick: () => this.nav.menu() }),
+      makeButton({ x: cx - w / 2, y: y + (h + gap) * 2, w, h, label: 'Top Scores', sub: 'The Survival leaderboard', onClick: () => this.nav.topScores() }),
+      makeButton({ x: 40, y: 644, w: 150, h: 46, label: '← Menu', fontSize: 16, onClick: () => this.nav.menu() }),
     ];
     this._unbind = bindButtons(document.getElementById('c'), this.viewport, () => this.buttons);
   }

@@ -6,6 +6,7 @@ import { initScene, drawScene, setDawn, drawVignette } from '../render/scene.js'
 import { reduce } from '../core/env.js';
 import { makeButton, bindButtons } from '../ui/widgets.js';
 import { openSettings } from '../ui/settingsPanel.js';
+import { getName } from '../save/save.js';
 
 export class MenuScene {
   constructor(viewport, nav) {
@@ -50,6 +51,13 @@ export class MenuScene {
     ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = '#fffdf5'; star(640, 290, 9, 4, 5); ctx.fill(); ctx.restore();
     ctx.restore();
     for (const b of this.buttons) b.draw();
+    const name = getName();
+    if (name) {
+      ctx.save(); ctx.textAlign = 'center';
+      ctx.fillStyle = '#ffd24a'; ctx.font = '700 15px system-ui,sans-serif';
+      ctx.fillText(`✦ Playing as ${name}`, 640, 262);
+      ctx.textAlign = 'left'; ctx.restore();
+    }
     ctx.save(); ctx.textAlign = 'center'; ctx.fillStyle = rgba('#9aa0c8', 0.7); ctx.font = '500 12px system-ui,sans-serif';
     ctx.fillText('Friendship is stronger than power.', 640, 680); ctx.textAlign = 'left'; ctx.restore();
     drawVignette();

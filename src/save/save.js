@@ -14,6 +14,8 @@ function freshSave() {
     unlocked: { heroes: ['trooper', 'radu', 'victor', 'manu', 'floris', 'andreea', 'pissy'], combos: ['light_lance'], upgrades: [] },
     settings: {},                 // merged A11y + Audio settings live here
     stats: { kills: 0, combosTriggered: {}, wins: 0, bestSurvival: 0 },
+    player: { name: '' },
+    scores: [],               // leaderboard: [{ name, score, time, diff }]
   };
 }
 
@@ -61,6 +63,22 @@ export function recordMission(missionId, stars, won) {
 
 export function isMissionCleared(missionId) { return state.campaign.some((c) => c.missionId === missionId && c.stars > 0); }
 export function missionStars(missionId) { const e = state.campaign.find((c) => c.missionId === missionId); return e ? e.stars : 0; }
+
+export function getName() { return (state.player && state.player.name) || ''; }
+export function setName(name) { state.player = state.player || {}; state.player.name = String(name || '').trim().slice(0, 16); save(); }
+
+/** Add a leaderboard entry; returns its 1-based rank, or 0 if it missed the top 12. */
+export function addScore(entry) {
+  state.scores = state.scores || [];
+  const e = { name: (entry.name || 'Hero').slice(0, 16), score: entry.score | 0, time: entry.time | 0, diff: entry.diff || 'normal' };
+  state.scores.push(e);
+  state.scores.sort((a, b) => b.score - a.score);
+  const rank = state.scores.indexOf(e) + 1;
+  state.scores = state.scores.slice(0, 12);
+  save();
+  return rank <= 12 ? rank : 0;
+}
+export function topScores(n = 10) { return (state.scores || []).slice(0, n); }
 
 export function recordSurvival(score) {
   if (score > (state.stats.bestSurvival || 0)) { state.stats.bestSurvival = score; save(); return true; }

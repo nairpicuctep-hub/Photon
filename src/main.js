@@ -17,8 +17,10 @@ import { ResultScene } from './scenes/ResultScene.js';
 import { CampaignMapScene } from './scenes/CampaignMapScene.js';
 import { HeroGalleryScene } from './scenes/HeroGalleryScene.js';
 import { ModeSelectScene } from './scenes/ModeSelectScene.js';
+import { TopScoresScene } from './scenes/TopScoresScene.js';
 import { makeHero, heroClass } from './heroes/roster.js';
-import { recordMission, recordSurvival, get as getSave } from './save/save.js';
+import { recordMission, recordSurvival, addScore, getName, get as getSave } from './save/save.js';
+import { askName } from './ui/namePrompt.js';
 import { missionById } from './data/missions.js';
 import { clamp } from './render/primitives.js';
 import { startAudio } from './audio/audio.js';
@@ -53,6 +55,7 @@ const nav = {
   },
   campaign() { setChrome(false); scenes.set(new CampaignMapScene(viewport, nav)); },
   modes() { setChrome(false); scenes.set(new ModeSelectScene(viewport, nav)); },
+  topScores(back) { setChrome(false); scenes.set(new TopScoresScene(viewport, nav, back)); },
   survival() { nav.battle({ mode: 'survival', towerHp: 130 }); },
   bossRush() {
     nav.battle({ mode: 'bossrush', towerHp: 170, waves: { mode: 'script', firstDelay: 2, script: [
@@ -79,6 +82,7 @@ const nav = {
     if (stats.mode === 'survival') {
       stats.newBest = recordSurvival(stats.score || 0);
       stats.best = (getSave().stats && getSave().stats.bestSurvival) || 0;
+      stats.rank = addScore({ name: getName() || 'Radu', score: stats.score || 0, time: stats.timeSurvived || 0, diff: getSettings().difficulty });
     }
     scenes.set(new ResultScene(viewport, nav, res, stats));
   },
@@ -96,6 +100,8 @@ if (params.scene === 'campaign') {
   nav.survival();
 } else if (params.scene === 'bossrush') {
   nav.bossRush();
+} else if (params.scene === 'top') {
+  nav.topScores(() => nav.menu());
 } else if (params.mission && missionById(params.mission)) {
   nav.mission(missionById(params.mission));
 } else if (params.scene === 'battle' || params.demo) {
@@ -114,6 +120,7 @@ if (params.scene === 'campaign') {
   rebuildControls(scene, hero);
 } else {
   nav.menu();
+  if (!getName()) askName(); // first launch: ask the player's name
 }
 
 // ----- Radu feel-slice controls ---------------------------------------------

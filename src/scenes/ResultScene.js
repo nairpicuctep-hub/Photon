@@ -22,10 +22,14 @@ export class ResultScene {
     setDawn(this.survival ? 0.6 : (this.won ? 0.95 : 0.12));
     const cx = 640, w = 280, h = 58;
     const m = this.stats.mission;
-    this.buttons = this.survival ? [
-      makeButton({ x: cx - w - 10, y: 470, w, h, label: 'Play Again', primary: true, onClick: () => this.nav.survival() }),
-      makeButton({ x: cx + 10, y: 470, w, h, label: 'Main Menu', onClick: () => this.nav.menu() }),
-    ] : m ? [
+    this.buttons = this.survival ? (() => {
+      const bw = 200, g = 14, sx = cx - (bw * 3 + g * 2) / 2;
+      return [
+        makeButton({ x: sx, y: 478, w: bw, h, label: 'Play Again', primary: true, onClick: () => this.nav.survival() }),
+        makeButton({ x: sx + bw + g, y: 478, w: bw, h, label: 'Top Scores', onClick: () => this.nav.topScores(() => this.nav.menu()) }),
+        makeButton({ x: sx + (bw + g) * 2, y: 478, w: bw, h, label: 'Menu', onClick: () => this.nav.menu() }),
+      ];
+    })() : m ? [
       makeButton({ x: cx - w - 10, y: 470, w, h, label: this.won ? 'Continue' : 'Retry', primary: true, onClick: () => (this.won ? this.nav.campaign() : this.nav.mission(m)) }),
       makeButton({ x: cx + 10, y: 470, w, h, label: this.won ? 'Replay' : 'Campaign Map', onClick: () => (this.won ? this.nav.mission(m) : this.nav.campaign()) }),
     ] : [
@@ -52,8 +56,9 @@ export class ResultScene {
       ctx.fillStyle = rgba('#cfd6ff', 1); ctx.font = '600 16px system-ui,sans-serif';
       ctx.fillText('SCORE', 640, 326);
       ctx.fillStyle = rgba('#cfd6ff', 1); ctx.font = '600 18px system-ui,sans-serif';
-      ctx.fillText(`Survived ${this.stats.timeSurvived || 0}s  ·  ${this.stats.kills || 0} defeated  ·  Best ${this.stats.best || 0}`, 640, 390);
-      if (this.newBest) { ctx.fillStyle = '#b6ff5a'; ctx.font = '700 18px system-ui,sans-serif'; ctx.fillText('★ NEW BEST!', 640, 420); }
+      ctx.fillText(`Survived ${this.stats.timeSurvived || 0}s  ·  ${this.stats.kills || 0} defeated  ·  Best ${this.stats.best || 0}`, 640, 388);
+      if (this.stats.rank) { ctx.fillStyle = rgba('#9bf0cf', 1); ctx.font = '700 16px system-ui,sans-serif'; ctx.fillText(`Leaderboard rank #${this.stats.rank}`, 640, 414); }
+      if (this.newBest) { ctx.fillStyle = '#b6ff5a'; ctx.font = '700 18px system-ui,sans-serif'; ctx.fillText('★ NEW BEST!', 640, 440); }
     } else {
       const title = this.won ? 'DAWN BREAKS' : 'THE LIGHT FADES';
       ctx.save(); ctx.globalCompositeOperation = 'lighter'; glow(640, 230, 240, this.won ? '#ffd24a' : '#6a5acd', 0.2); ctx.restore();
