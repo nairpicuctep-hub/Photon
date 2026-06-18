@@ -19,7 +19,7 @@ export class MenuScene {
     const cx = 640, w = 300, h = 58, gap = 14; let y = 312;
     this.buttons = [
       makeButton({ x: cx - w / 2, y, w, h, label: 'Campaign', sub: 'Act I — The First Light', primary: true, onClick: () => this.nav.campaign() }),
-      makeButton({ x: cx - w / 2, y: y + (h + gap), w, h, label: 'Play', sub: 'Endless Skirmish', onClick: () => this.nav.battle({ mode: 'endless' }) }),
+      makeButton({ x: cx - w / 2, y: y + (h + gap), w, h, label: 'Play', sub: 'Survival & Boss Rush', onClick: () => this.nav.modes() }),
       makeButton({ x: cx - w / 2, y: y + (h + gap) * 2, w, h, label: 'Hero Gallery', sub: 'Meet Echipa Lumina', onClick: () => this.nav.gallery() }),
       makeButton({ x: cx - w / 2, y: y + (h + gap) * 3, w, h, label: 'Settings', sub: 'Audio & accessibility', onClick: () => openSettings() }),
     ];

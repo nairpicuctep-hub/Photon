@@ -33,6 +33,11 @@ export const ENEMY_DEFS = {
     attack: { damage: 32, range: 78, cooldown: 1.7, kind: 'melee' },
     traits: ['armored'], height: 130,
   },
+  hexer: {
+    id: 'hexer', name: 'Hexer', maxHp: 52, moveSpeed: 48,
+    attack: { damage: 6, range: 340, cooldown: 2.4, kind: 'bolt' },
+    traits: ['silencer'], height: 80,
+  },
   // --- bosses (M4+) ---
   umbra: {
     id: 'umbra', name: 'Umbra', maxHp: 900, moveSpeed: 26,

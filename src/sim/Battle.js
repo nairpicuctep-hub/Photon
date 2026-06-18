@@ -21,6 +21,7 @@ import { setMusicDawn, sfx } from '../audio/audio.js';
 import { getSettings } from '../a11y/settings.js';
 import { get as getSave } from '../save/save.js';
 import { aggregateEffects } from '../data/upgrades.js';
+import { difficulty } from '../data/difficulty.js';
 
 export { FIELD };
 
@@ -48,6 +49,8 @@ class Combatant {
     this.dead = false;
     this.attacking = false;
     this.atkSpeedMul = 1;          // buffed by Radu's aura
+    this.dmgMul = 1;               // enemy damage scaled by difficulty
+    this.silenced = 0;             // Hexer curse: ability disabled while > 0
     this.stun = 0;
     const melee = def.attack && def.attack.kind === 'melee';
     this.hitR = melee ? 38 : (side === 'shadow' ? 26 : 22);
@@ -87,6 +90,17 @@ export class Battle {
     this.economy.cfg.killBonus += up.killBonus;
     this.economy.energy = Math.min(this.economy.cfg.cap, this.economy.energy + up.startBonus);
     this.towerMaxHp = Math.round(this.towerMaxHp * up.towerMul); this.towerHp = this.towerMaxHp;
+
+    // difficulty (Easy/Normal/Hard)
+    const D = difficulty(getSettings().difficulty);
+    this._enemyHpMul = D.enemyHp; this._enemyDmgMul = D.enemyDmg;
+    this.economy.cfg.regenPerSec *= D.regenMul;
+    this.economy.energy = Math.max(10, this.economy.energy + D.startBonus);
+    this.towerMaxHp = Math.round(this.towerMaxHp * D.towerMul); this.towerHp = this.towerMaxHp;
+    if (this.waves && this.waves.baseInterval) this.waves.baseInterval *= D.spawnMul;
+    // Survival / Boss Rush: no destructible Core — survive (score) or clear the
+    // bosses. Use a large FINITE hp (Infinity would make the core's render math NaN).
+    if (this.mode === 'survival' || this.mode === 'bossrush') { this.coreMaxHp = 1e9; this.coreHp = 1e9; }
 
     initScene({ W: FIELD.W, H: FIELD.H, GROUND: FIELD.GROUND, reduce });
     setDawn(this.dawn);
@@ -178,7 +192,10 @@ export class Battle {
     const def = enemyDef(kind); if (!def) return;
     const x = FIELD.CORE_X - 44;
     const r = makeEnemy(kind, x, FIELD.GROUND);
-    this.enemies.push(new Combatant('shadow', def, r, x));
+    const c = new Combatant('shadow', def, r, x);
+    if (this._enemyHpMul && this._enemyHpMul !== 1) { c.maxHp = Math.round(c.maxHp * this._enemyHpMul); c.hp = c.maxHp; }
+    c.dmgMul = this._enemyDmgMul || 1;
+    this.enemies.push(c);
   }
 
   // ---- damage helpers ------------------------------------------------------
@@ -188,6 +205,7 @@ export class Battle {
     if (target.def.traits && target.def.traits.includes('armored') && !opts.antiArmor) d *= 0.5;
     if (target.def.cloaked && (target.r.revealed || 0) < 0.5) d *= 0.15; // must be revealed
     target.hp -= d;
+    if (opts.silence && target.side === 'light') target.silenced = 4; // Hexer's curse
     if (target.r.hit) target.r.hit();
     if (target.hp <= 0) this._kill(target);
   }
@@ -254,7 +272,10 @@ export class Battle {
     this._updateDawn(dt);
     this._decay(dt);
 
-    if (this.coreHp <= 0) this._finish('won');
+    if (this.mode === 'bossrush') {
+      if (this.towerHp <= 0) this._finish('lost');
+      else if (this.waves.done && this.enemies.length === 0 && this.time > 6) this._finish('won');
+    } else if (this.coreHp <= 0) this._finish('won');
     else if (this.towerHp <= 0) this._finish('lost');
   }
 
@@ -262,11 +283,13 @@ export class Battle {
     if (c.dead) return;
     if (c.atkCd > 0) c.atkCd -= dt;
     if (c.abilityCd > 0) c.abilityCd -= dt;
+    if (c.silenced > 0) c.silenced -= dt;
     if (c.stun > 0) { c.stun -= dt; return; }
 
     // signature ability (heroes) — Manu alternates Smash / Aegis of Dawn
+    // (Hexer's curse silences signatures while c.silenced > 0)
     const sig = SIGNATURE[c.def.id];
-    if (sig && c.abilityCd <= 0 && c.side === 'light') {
+    if (sig && c.abilityCd <= 0 && c.side === 'light' && c.silenced <= 0) {
       let method = sig.method;
       if (c.def.id === 'manu') { c._sigN = (c._sigN || 0) + 1; method = (c._sigN % 2 === 0) ? 'aegisOfDawn' : 'titanSmash'; }
       if (typeof c.r[method] === 'function') { this._fireSignature(c, method); c.abilityCd = sig.cd; }
@@ -303,6 +326,8 @@ export class Battle {
     const a = c.def.attack;
     c.atkCd = a.cooldown / c.atkSpeedMul;
     const anti = c.def.id === 'manu' || (c.def.tags && c.def.tags.includes('anti_armor'));
+    const dmg = a.damage * (c.dmgMul || 1); // enemy damage scaled by difficulty
+    const silence = !!(c.def.traits && c.def.traits.includes('silencer'));
     // play attack flourish
     const anim = ATTACK_ANIM[c.def.id];
     if (anim && typeof c.r[anim] === 'function' && this._isContinuous(c)) c.r[anim]();
@@ -314,15 +339,15 @@ export class Battle {
         // the combo replaces the normal beam this shot
       } else {
         const foes = c.side === 'light' ? this.enemies : this.allies;
-        for (const f of foes) if (!f.dead && Math.sign(f.x - c.x) === dir && Math.abs(f.x - c.x) <= a.range) this.applyDamage(f, a.damage, { antiArmor: anti });
+        for (const f of foes) if (!f.dead && Math.sign(f.x - c.x) === dir && Math.abs(f.x - c.x) <= a.range) this.applyDamage(f, dmg, { antiArmor: anti });
         this.beams.push({ x1: c.x, y: c.attackY, x2: c.x + dir * a.range, life: 0, max: 0.22, dark: c.side === 'shadow' });
       }
     } else if (a.kind === 'arc') {
-      spawnArc({ side: c.side, x: c.x, y: c.attackY, tx: target.x, ty: FIELD.GROUND - 30, damage: a.damage, splash: 80, dark: c.side === 'shadow' });
+      spawnArc({ side: c.side, x: c.x, y: c.attackY, tx: target.x, ty: FIELD.GROUND - 30, damage: dmg, splash: 80, dark: c.side === 'shadow' });
     } else if (a.kind === 'melee') {
-      this.applyDamage(target, a.damage, { antiArmor: anti });
+      this.applyDamage(target, dmg, { antiArmor: anti, silence });
     } else if (a.kind === 'bolt') {
-      spawnBolt({ side: c.side, x: c.x + Math.sign(target.x - c.x) * 18, y: c.attackY, target, damage: a.damage, dark: c.side === 'shadow', pierce: !!a.pierce });
+      spawnBolt({ side: c.side, x: c.x + Math.sign(target.x - c.x) * 18, y: c.attackY, target, damage: dmg, dark: c.side === 'shadow', pierce: !!a.pierce, silence });
     }
   }
 
@@ -331,7 +356,7 @@ export class Battle {
     if (c.atkCd > 0) return;
     const a = c.def.attack; if (!a || a.kind === 'none') return;
     c.atkCd = a.cooldown / c.atkSpeedMul;
-    const dmg = a.damage;
+    const dmg = a.damage * (c.dmgMul || 1);
     if (struct.isCore) { this.coreHp = Math.max(0, this.coreHp - dmg); this.flash = Math.min(1, this.flash + 0.06); particles.emitPhotons(reduce ? 3 : 8, FIELD.CORE_X - 30, FIELD.GROUND - 70, 120, 20); }
     else { this.towerHp = Math.max(0, this.towerHp - dmg); this.shake = Math.max(this.shake, 6); }
   }
@@ -352,6 +377,10 @@ export class Battle {
     for (const a of this.allies) {
       if (a.def.id === 'radu' && a.r.auraOn) {
         for (const o of this.allies) if (Math.abs(o.x - a.x) < 180) o.atkSpeedMul = Math.max(o.atkSpeedMul, 1.5);
+      }
+      // Pissy's Good Spirits cleanses the Hexer's silence on nearby friends
+      if (a.def.id === 'pissy' && a.r.moraleOn) {
+        for (const o of this.allies) if (Math.abs(o.x - a.x) < 200) o.silenced = 0;
       }
     }
     // timed combo haste (Bastion Dawn / Morale Surge) — applied before attacks resolve
@@ -408,6 +437,7 @@ export class Battle {
     this.state = result;
     this.flash = 1;
     sfx(result === 'won' ? 'win' : 'lose');
+    if (this.mode === 'survival') { this.stats.timeSurvived = Math.floor(this.time); this.stats.score = this.stats.kills * 10 + this.stats.timeSurvived; }
     if (this.onEnd) this.onEnd(result, this.stats);
   }
 

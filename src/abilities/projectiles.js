@@ -20,7 +20,7 @@ export function spawnBolt(o) {
     kind: 'bolt', side: o.side, x: o.x, y: o.y,
     target: o.target, damage: o.damage,
     speed: o.speed || 520, color: o.color || (o.dark ? '#b06bff' : '#ffe28a'),
-    dark: !!o.dark, pierce: !!o.pierce, r: o.r || 4, life: 0, max: 3,
+    dark: !!o.dark, pierce: !!o.pierce, silence: !!o.silence, r: o.r || 4, life: 0, max: 3,
     onHit: o.onHit, dead: false,
   });
 }

@@ -13,7 +13,7 @@ function freshSave() {
     campaign: [],                 // [{ missionId, stars }]
     unlocked: { heroes: ['trooper', 'radu', 'victor', 'manu', 'floris', 'andreea', 'pissy'], combos: ['light_lance'], upgrades: [] },
     settings: {},                 // merged A11y + Audio settings live here
-    stats: { kills: 0, combosTriggered: {}, wins: 0 },
+    stats: { kills: 0, combosTriggered: {}, wins: 0, bestSurvival: 0 },
   };
 }
 
@@ -61,6 +61,11 @@ export function recordMission(missionId, stars, won) {
 
 export function isMissionCleared(missionId) { return state.campaign.some((c) => c.missionId === missionId && c.stars > 0); }
 export function missionStars(missionId) { const e = state.campaign.find((c) => c.missionId === missionId); return e ? e.stars : 0; }
+
+export function recordSurvival(score) {
+  if (score > (state.stats.bestSurvival || 0)) { state.stats.bestSurvival = score; save(); return true; }
+  return false;
+}
 
 export function unlock(kind, id) {
   const list = state.unlocked[kind];

@@ -34,6 +34,13 @@ function speed() {
   sel.onchange = () => setSetting('gameSpeed', +sel.value);
   return sel;
 }
+function difficultySel() {
+  const s = getSettings(); const sel = document.createElement('select');
+  sel.setAttribute('aria-label', 'difficulty');
+  [['easy', 'Easy'], ['normal', 'Normal'], ['hard', 'Hard']].forEach(([v, t]) => { const o = document.createElement('option'); o.value = v; o.textContent = t; if (v === s.difficulty) o.selected = true; sel.appendChild(o); });
+  sel.onchange = () => setSetting('difficulty', sel.value);
+  return sel;
+}
 
 export function openSettings() {
   if (panel) { panel.style.display = 'flex'; return; }
@@ -49,6 +56,7 @@ export function openSettings() {
   card.appendChild(row('Mute', checkbox('muted')));
   card.appendChild(row('Reduced motion', checkbox('reducedMotion')));
   card.appendChild(row('Colorblind tags', checkbox('colorblind')));
+  card.appendChild(row('Difficulty', difficultySel()));
   card.appendChild(row('Game speed', speed()));
 
   const reset = document.createElement('button');

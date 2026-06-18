@@ -16,8 +16,9 @@ import { MenuScene } from './scenes/MenuScene.js';
 import { ResultScene } from './scenes/ResultScene.js';
 import { CampaignMapScene } from './scenes/CampaignMapScene.js';
 import { HeroGalleryScene } from './scenes/HeroGalleryScene.js';
+import { ModeSelectScene } from './scenes/ModeSelectScene.js';
 import { makeHero, heroClass } from './heroes/roster.js';
-import { recordMission } from './save/save.js';
+import { recordMission, recordSurvival, get as getSave } from './save/save.js';
 import { missionById } from './data/missions.js';
 import { clamp } from './render/primitives.js';
 import { startAudio } from './audio/audio.js';
@@ -51,6 +52,19 @@ const nav = {
     scenes.set(new BattleScene(viewport, { ...opts, onResult: (res, stats) => nav.result(res, { ...stats, mode: opts.mode || 'endless' }) }));
   },
   campaign() { setChrome(false); scenes.set(new CampaignMapScene(viewport, nav)); },
+  modes() { setChrome(false); scenes.set(new ModeSelectScene(viewport, nav)); },
+  survival() { nav.battle({ mode: 'survival', towerHp: 130 }); },
+  bossRush() {
+    nav.battle({ mode: 'bossrush', towerHp: 170, waves: { mode: 'script', firstDelay: 2, script: [
+      { enemyId: 'crawler', count: 4, atTime: 1 },
+      { enemyId: 'umbra', count: 1, atTime: 4 },
+      { enemyId: 'slinger', count: 3, atTime: 14 },
+      { enemyId: 'doctorNull', count: 1, atTime: 24 },
+      { enemyId: 'wraith', count: 3, atTime: 30 },
+      { enemyId: 'juggernaut', count: 1, atTime: 38 },
+      { enemyId: 'theVoid', count: 1, atTime: 48 },
+    ] } });
+  },
   mission(m) {
     setChrome(false);
     scenes.set(new BattleScene(viewport, { ...m.opts, mode: 'campaign', onResult: (res, stats) => nav.result(res, { ...stats, mode: 'campaign', mission: m }) }));
@@ -62,6 +76,10 @@ const nav = {
       recordMission(stats.mission.id, stars, true);
       stats.stars = stars;
     }
+    if (stats.mode === 'survival') {
+      stats.newBest = recordSurvival(stats.score || 0);
+      stats.best = (getSave().stats && getSave().stats.bestSurvival) || 0;
+    }
     scenes.set(new ResultScene(viewport, nav, res, stats));
   },
   gallery() { setChrome(false); scenes.set(new HeroGalleryScene(viewport, nav)); },
@@ -72,6 +90,12 @@ if (params.scene === 'campaign') {
   nav.campaign();
 } else if (params.scene === 'gallery') {
   nav.gallery();
+} else if (params.scene === 'modes') {
+  nav.modes();
+} else if (params.scene === 'survival') {
+  nav.survival();
+} else if (params.scene === 'bossrush') {
+  nav.bossRush();
 } else if (params.mission && missionById(params.mission)) {
   nav.mission(missionById(params.mission));
 } else if (params.scene === 'battle' || params.demo) {
