@@ -4,7 +4,7 @@
 // localhost (won't register from file://).
 
 const CACHE = 'echipa-lumina-v1';
-const SHELL = ['./', './index.html', './public/manifest.webmanifest', './public/icons/icon.svg'];
+const SHELL = ['./', './index.html', './manifest.webmanifest', './icon.svg'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()).catch(() => {}));

@@ -1,15 +1,14 @@
 {
-  "name": "Radu Photon — Frontline of Light",
-  "short_name": "Radu Photon",
-  "description": "Command Echipa Lumina and push back the darkness in a lane-battle of light versus shadow.",
-  "start_url": ".",
-  "scope": ".",
-  "display": "standalone",
-  "orientation": "landscape",
+  "name": "Echipa Lumina: Frontline of Light",
+  "short_name": "Echipa Lumina",
+  "description": "A living comic of light — Radu Photon and the Light Team against the Shadow Network.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "any",
   "background_color": "#06070f",
   "theme_color": "#06070f",
   "icons": [
-    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+    { "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
   ]
 }
