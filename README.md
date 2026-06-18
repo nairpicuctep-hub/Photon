@@ -1,114 +1,135 @@
-# Radu Photon — Echipa Lumina
+# Echipa Lumina: Frontline of Light
 
-*A light-versus-darkness game made from a kid's comic.*
+A touch-first, offline-capable **2D Canvas** lane-battler — *"a living comic of
+light."* Radu Photon leads **Echipa Lumina** (the Light Team) against the Shadow
+Network. The sky turns from dark void to dawn as the light side advances, and
+the heart of the game is the **friendship / combo engine**: heroes combined are
+transformative, and some obstacles can only be broken *together*.
 
-Radu visits CERN with his dad, an accelerator accident turns his atoms into photons, and he becomes **Radu Photon** — a hero who controls light and leads **Echipa Lumina** ("the Light Team"). The idea running through everything: **friendship is stronger than power.**
-
-This repository holds the games built from that comic. The main game is a side-view tactical lane-battler; two earlier prototypes and the design docs are included as well.
-
----
-
-## Play
-
-**Main game — *Frontline of Light*** (the lane-battler)
-- **Online:** turn on GitHub Pages (steps below) and open `https://<your-username>.github.io/<repo-name>/`
-- **Offline:** just double-click `index.html`. No install, no internet, no setup — it runs anywhere, including locked-down work computers.
-
-**Other prototypes**
-- `games/classic-2d.html` — the original light-puzzle chamber game (double-click to play)
-- `games/3d/index.html` — a 3D arena prototype with switchable heroes (needs internet on first load; can be installed as an app on a phone)
+Reproduces the approved "feel slice" art and ability-feel in a real, modular
+codebase and grows it through the milestones in
+`../CLAUDE-CODE-BRIEF-echipa-lumina.md`.
 
 ---
 
-## Controls (Frontline of Light)
+## Status — all milestones implemented
 
-| Action | Input |
+- **M1 Engine + renderer + Radu** — ported render toolkit (primitives, palette,
+  inked figures, verlet cloth, painted dawn scene, photon particles), guarded
+  loop, DPR viewport. Radu rendered indistinguishably from his feel slice.
+- **M2 All heroes + lane battle** — Radu, Victor, Manu, Floris, Andreea (ported
+  from their feel slices) + Light Trooper + provisional Pissy; the tug-of-war
+  battle (Photon Tower vs Dark Core), light-energy economy, escalating waves,
+  Shadow minions, HUD + deploy cards, touch/keys, front-line→dawn, win/lose,
+  Menu → Battle → Result.
+- **M3 Friendship / combo engine** — 8 combos incl. the **Light Lance**
+  (Radu × Victor through the Prism) that shatters combo-gated **dark walls**;
+  banners + the thesis caption *"Friendship is stronger than power."*
+- **M4 Villains + bosses** — Crawler / Slinger / Brute / Null-Drone (regen
+  suppression), and **Umbra**, the reveal-gated boss (near-immune until Floris
+  exposes it → fires the **Exposed** combo).
+- **M5 Campaign + meta + audio + a11y + save + PWA** — Act I campaign map &
+  missions (combo-teaching beats), the friendship upgrade meta, synthesized
+  adaptive dark→dawn audio + SFX, a DOM accessibility settings panel, versioned
+  save, and a service worker (offline + installable).
+- **M6 Content / balance / polish** — Doctor Null & The Void finale bosses, the
+  full 8-combo set, an adversarial code review pass (12 findings fixed).
+
+---
+
+## Run it
+
+No build step. You only need a static file server because browsers load ES
+modules over `http://`, not `file://`.
+
+**Windows (uses Git's bundled Perl — no Node/Python required):**
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\serve.ps1   # or double-click serve.bat
+```
+
+Then open <http://localhost:8080/>.
+
+Any static server works too (`npx serve`, `python -m http.server`, VS Code Live
+Server, …) — point it at this folder.
+
+### Controls
+
+- **Deploy:** tap a card or press `1`–`7` (Trooper, Manu, Victor, Floris,
+  Andreea, Radu, Pissy). Units auto-advance, auto-engage, and fire abilities;
+  combos trigger automatically when heroes cooperate.
+- **Menu:** Campaign · Play (Endless Skirmish) · Hero Gallery · Settings.
+
+### Dev / demo routes (URL hash)
+
+| Hash | Shows |
 |---|---|
-| Deploy a hero | Click its card, or press **1–7** |
-| Pause | **P** |
-| Mute | **M** |
-| Start / restart | **Enter** or **Space** |
-
----
-
-## How it plays
-
-Darkness advances on your **Photon Tower** from the right. You spend regenerating **light energy** to deploy heroes from the cards along the bottom. Every hero answers a different threat — there is no single best unit, only the right one for the moment. Push the front line forward (and watch dawn break across the battlefield as you do), grind down the **Dark Core**, survive the **Umbra** that wakes to guard it, and shatter the Core before your Tower falls.
-
-### The team — deployable heroes
-
-| Hero | Role |
-|---|---|
-| **Photon Trooper** | Cheap ranged backbone — holds the line and kills drones |
-| **Manu the Titan** | Slow wall of HP — anchors the front, shrugs off darkness |
-| **Victor the Maker** | Marches up and plants a stationary **Light Prism turret** — locks down a zone |
-| **Floris** | Long-range **artillery** with splash — shreds swarms |
-| **Andreea** | A **slow-field** aura — strangles fast rushes |
-| **Radu Photon** | Fast, piercing **hero strike** — breaks through a stalled front |
-| **Pissy** | **Blinks into the enemy backline** — kills the Slingers and Null Drones you can't otherwise reach |
-
-### The darkness — The Shadow Network
-
-Shade Crawlers swarm, Slingers snipe from range, Brutes soak damage, **Null Drones** halve your energy regeneration while alive (so kill them fast), and **Umbra** — living darkness — wakes to guard the Core once you've hurt it.
-
----
-
-## Put it online with GitHub Pages (about a minute, one time)
-
-1. Create a new repository on GitHub and upload these files, keeping the structure (`index.html` stays at the root).
-2. In the repository, go to **Settings → Pages**.
-3. Under **Build and deployment → Source**, choose **Deploy from a branch**.
-4. Set the branch to **main** and the folder to **/ (root)**, then **Save**.
-5. Wait about a minute, then open `https://<your-username>.github.io/<repo-name>/`. The game loads immediately.
-
-There's no build step and nothing to configure — it's plain HTML and JavaScript.
-
----
-
-## Install it as an app (optional)
-
-The main game is a Progressive Web App, so once it's live on GitHub Pages you can install it like a native app — its own icon, full-screen, and still working offline.
-
-**Important:** installing is only offered from the **HTTPS URL** (your GitHub Pages link). It does *not* appear when you double-click the file or view it in a preview pane.
-
-- **Desktop (Chrome / Edge):** open the Pages URL, then either tap the **Install app** button in the game's menu or click the install icon in the address bar.
-- **Android (Chrome):** open the Pages URL and tap **Install app** in the menu (or the browser's "Add to Home screen").
-- **iPhone / iPad (Safari):** open the Pages URL, tap the **Share** button, then **Add to Home Screen**. iOS never shows an automatic prompt — this is the only way, and it's normal.
-
-Double-clicking `index.html` still runs the game fine; it just can't be *installed* without HTTPS.
+| `#feel` | Radu feel slice (M1 fidelity reference) |
+| `#hero=victor` (manu/floris/andreea/pissy/trooper) | a single hero in isolation + its moves |
+| `#scene=battle,auto` | endless skirmish, auto-played (attract mode) |
+| `#demo=combos` | the whole team mid-field — watch the 8 combos fire |
+| `#demo=lightlance` | the Dark Wall broken by the Light Lance |
+| `#demo=umbra` | Umbra revealed by Floris (reveal-gate) |
+| `#scene=campaign` · `#mission=m1_2` | campaign map / a specific mission |
 
 ---
 
 ## Project structure
 
 ```
-.
-├── index.html                      # Main game: Frontline of Light (lane-battler, installable PWA)
-├── manifest.webmanifest            # PWA manifest (name, icons, colors)
-├── sw.js                           # Service worker (offline caching)
-├── icon-192.png / icon-512.png / icon.svg   # App icons
-├── games/
-│   ├── classic-2d.html             # Light-puzzle chamber prototype
-│   └── 3d/                         # 3D arena prototype (needs internet on first load)
-├── docs/
-│   ├── echipa-lumina-GDD.md        # Game Design Document for the lane-battler
-│   └── claude-code-game-brief.md   # Build spec for a larger production version
-├── README.md
-└── LICENSE
+echipa-lumina/
+├─ index.html · serve.ps1 / serve.bat · sw.js (service worker)
+├─ public/ manifest.webmanifest, icons/
+├─ tools/serve.pl            zero-dependency static server (Perl core)
+└─ src/
+   ├─ main.js                bootstrap + hash routing + nav + PWA/audio init
+   ├─ core/                  loop, canvas (DPR viewport), time, input, rng, events, pool, env
+   ├─ render/                gfx (active ctx), primitives, palette, figure, cloth, scene, particles
+   ├─ heroes/                HeroBase, radu/victor/manu/floris/andreea/trooper/pissy, roster
+   ├─ enemies/               EnemyBase, crawler/slinger/brute/nullDrone, bosses/ (umbra, doctorNull, theVoid)
+   ├─ abilities/             projectiles (bolts/arcs)
+   ├─ combo/                 ComboEngine, combos (8 ComboDefs)
+   ├─ sim/                   Battle, economy, waves, targeting, field
+   ├─ scenes/                SceneManager, Menu, CampaignMap, Battle, Result, FeelSlice, HeroPreview
+   ├─ ui/                    hud, comboBanner, widgets, settingsPanel
+   ├─ a11y/                  settings
+   ├─ audio/                 audio (Web Audio synthesis)
+   ├─ save/                  save (versioned localStorage + migrate)
+   └─ data/                  heroes, enemies, missions, upgrades  (tunable, data-driven)
 ```
 
+### Extending (data + minimal code)
+
+- **Hero:** read its feel slice → `src/heroes/<id>.js` extending `HeroBase`
+  (port `pose()`/`draw*()`/abilities, own INK/RIM via `setFigureStyle`, a static
+  `MOVES`) → add stats to `data/heroes.js` + register in `heroes/roster.js`.
+- **Combo:** add a `ComboDef` to `combo/combos.js` + a detection/effect hook in
+  `ComboEngine`.
+- **Mission:** add a `MissionDef` (waves / walls / bosses) to `data/missions.js`.
+- **Enemy / boss:** `src/enemies/[bosses/]<id>.js` + `data/enemies.js` + roster.
+
 ---
 
-## Tech
+## Why native ES modules (and not Vite/TypeScript yet)
 
-No frameworks, no dependencies, no build step. The main game and the classic prototype are single self-contained HTML files (Canvas 2D + Web Audio). The 3D prototype loads Three.js from a CDN, which is why it needs internet the first time.
+The brief specifies Vite + TypeScript. The machine this was built on is locked
+down: **Node.js cannot be installed** (winget blocked by group policy, direct
+`nodejs.org` downloads reset by the firewall, no Python). So this is authored as
+**native ES modules** that run with zero tooling via the bundled-Perl server.
 
----
+This is *forward-compatible*, not a different architecture — Vite serves native
+ES modules as-is. Migrating to the brief's exact stack is mechanical:
+`npm create vite`, drop in `src/`, optionally rename `.js`→`.ts` (the JSDoc
+typedefs sketch the types), swap the hand-rolled `sw.js` for `vite-plugin-pwa`,
+and add Vitest for the pure-logic modules (economy, combo resolution, save).
+The Canvas2D rendering pipeline — the thing the brief insists must be preserved
+— is untouched by any of that.
 
-## Credits and license
+## Known gaps / future work
 
-Radu Photon, Echipa Lumina, and the story and characters were created by the family this game was made for. Those characters and the comic belong to them.
-
-The **code** in this repository is offered under the MIT License (see `LICENSE`), so anyone is free to read it, learn from it, and reuse it. Open `LICENSE` and replace `<YOUR NAME>` with yours. If you'd rather keep everything fully private, just delete the `LICENSE` file before publishing.
-
-*Made with love, for Radu.*
+- A dedicated **upgrade-tree UI** (upgrades currently auto-unlock per mission
+  clear and apply their effects; the data + effects are in `data/upgrades.js`).
+- Acts II–IV beyond the Act I arc; more authored waves and balance tuning.
+- A **Pissy feel slice** for art approval (Pissy is provisional).
+- Victor/Floris ability particles currently use the shared gold photons rather
+  than their teal/violet variants (a fidelity nicety).
