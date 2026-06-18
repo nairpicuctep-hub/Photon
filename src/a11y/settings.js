@@ -10,7 +10,7 @@ const DEFAULTS = {
   reducedMotion: envReduce,
   colorblind: false,   // adds letter tags so units aren't distinguished by color alone
   gameSpeed: 1,        // accessibility: slow the whole game
-  master: 0.8, music: 0.6, sfx: 0.9, muted: false,
+  master: 0.75, music: 0.5, sfx: 0.85, muted: false,
 };
 
 let settings = { ...DEFAULTS, ...(getSave().settings || {}) };

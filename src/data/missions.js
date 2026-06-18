@@ -70,6 +70,7 @@ export const MISSIONS = [
       waves: { mode: 'script', firstDelay: 1.5, script: [
         { enemyId: 'nullDrone', count: 1, atTime: 1 },
         { enemyId: 'crawler', count: 4, atTime: 4 },
+        { enemyId: 'wraith', count: 2, atTime: 8 },
         { enemyId: 'brute', count: 1, atTime: 10 },
         { enemyId: 'doctorNull', count: 1, atTime: 14 },
       ] },
@@ -84,8 +85,10 @@ export const MISSIONS = [
       waves: { mode: 'script', firstDelay: 1.5, script: [
         { enemyId: 'crawler', count: 5, atTime: 1 },
         { enemyId: 'slinger', count: 3, atTime: 7 },
+        { enemyId: 'wraith', count: 3, atTime: 10 },
         { enemyId: 'brute', count: 2, atTime: 13 },
-        { enemyId: 'theVoid', count: 1, atTime: 18 },
+        { enemyId: 'juggernaut', count: 1, atTime: 16 },
+        { enemyId: 'theVoid', count: 1, atTime: 20 },
       ] },
     },
     reward: { unlock: null },

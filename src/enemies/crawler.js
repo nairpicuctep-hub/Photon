@@ -5,7 +5,7 @@ import { EnemyBase } from './EnemyBase.js';
 
 export class Crawler extends EnemyBase {
   constructor(def = {}) {
-    super({ height: 40, width: 24, bodyHi: '#221733', bodyLo: '#0a0814', rimCol: '#ff6a8a', eyeCol: '#ff5d7a', ...def });
+    super({ height: 52, width: 28, bodyHi: '#221733', bodyLo: '#0a0814', rimCol: '#ff6a8a', eyeCol: '#ff5d7a', ...def });
   }
   drawBody() {
     const scuttle = Math.abs(Math.sin(this.t * 11)) * 3;

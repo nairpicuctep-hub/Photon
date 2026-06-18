@@ -23,6 +23,16 @@ export const ENEMY_DEFS = {
     attack: { damage: 0, range: 0, cooldown: 99, kind: 'none' },
     traits: ['suppresses_regen'],
   },
+  wraith: {
+    id: 'wraith', name: 'Wraith', maxHp: 46, moveSpeed: 132,
+    attack: { damage: 9, range: 48, cooldown: 0.7, kind: 'melee' },
+    traits: ['cloaked', 'fear'], cloaked: true, height: 78,
+  },
+  juggernaut: {
+    id: 'juggernaut', name: 'Juggernaut', maxHp: 360, moveSpeed: 26,
+    attack: { damage: 32, range: 78, cooldown: 1.7, kind: 'melee' },
+    traits: ['armored'], height: 130,
+  },
   // --- bosses (M4+) ---
   umbra: {
     id: 'umbra', name: 'Umbra', maxHp: 900, moveSpeed: 26,

@@ -6,7 +6,7 @@ import { EnemyBase } from './EnemyBase.js';
 
 export class Slinger extends EnemyBase {
   constructor(def = {}) {
-    super({ height: 64, width: 22, bodyHi: '#1d1733', bodyLo: '#0a0816', rimCol: '#b06bff', eyeCol: '#c46bff', ...def });
+    super({ height: 84, width: 26, bodyHi: '#1d1733', bodyLo: '#0a0816', rimCol: '#b06bff', eyeCol: '#c46bff', ...def });
   }
   drawBody() {
     const sway = Math.sin(this.t * 2.2) * 3;

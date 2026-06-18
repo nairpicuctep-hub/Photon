@@ -20,6 +20,14 @@ import { HeroBase } from './HeroBase.js';
 const { SUIT_HI, SUIT_LO, SUIT_SH, SKIN_HI, SKIN_LO, SEAM, HAIR, HAIR_HI, EYE, RIM, INK } = RADU;
 
 export class Radu extends HeroBase {
+  static MOVES = [
+    { key: '1', label: 'Idle', state: 'idle' },
+    { key: '2', label: 'Walk', state: 'walk' },
+    { key: '3', label: 'Lightstep', method: 'lightstep' },
+    { key: '4', label: 'Energy Blast', method: 'energyBlast' },
+    { key: '5', label: 'Photon Aura', method: 'toggleAura' },
+  ];
+
   constructor(def = {}) {
     super({ id: 'radu', name: 'Radu Photon', ...def });
 

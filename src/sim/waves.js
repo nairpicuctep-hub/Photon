@@ -42,6 +42,8 @@ export class WaveDirector {
 
   pickKind() {
     const e = this.elapsed, r = Math.random();
+    if (e > 75 && r < 0.10) return 'juggernaut'; // late-game siege
+    if (e > 55 && r < 0.16) return 'wraith';      // fast cloaked flankers
     if (e > 45 && r < 0.12) return 'nullDrone';
     if (e > 22 && r < 0.28) return 'brute';
     if (r < 0.5) return 'crawler';

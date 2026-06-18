@@ -34,17 +34,26 @@ onChange((k) => { if (['master', 'music', 'sfx', 'muted'].includes(k)) applyVolu
 
 // Ambient bed: a low drone (dark) crossfading into a brighter detuned pad (dawn).
 function buildBed() {
-  darkGain = ctx.createGain(); darkGain.gain.value = 0.18; darkGain.connect(musicGain);
-  dawnGain = ctx.createGain(); dawnGain.gain.value = 0.0; dawnGain.connect(musicGain);
-  const mkOsc = (type, freq, gainNode, detune = 0) => {
-    const o = ctx.createOscillator(); o.type = type; o.frequency.value = freq; o.detune.value = detune;
-    const g = ctx.createGain(); g.gain.value = 0.5; o.connect(g); g.connect(gainNode); o.start(); return o;
+  // A soft, low, slowly-breathing ambient pad — pure sines through a lowpass,
+  // gently swept by an LFO. No sawtooths (those buzz). Low gain throughout.
+  const bedLP = ctx.createBiquadFilter(); bedLP.type = 'lowpass'; bedLP.frequency.value = 620; bedLP.Q.value = 0.4;
+  bedLP.connect(musicGain);
+  // gentle filter swell so the pad "breathes" instead of droning
+  const lfo = ctx.createOscillator(); lfo.frequency.value = 0.05;
+  const lfoGain = ctx.createGain(); lfoGain.gain.value = 160;
+  lfo.connect(lfoGain); lfoGain.connect(bedLP.frequency); lfo.start();
+
+  darkGain = ctx.createGain(); darkGain.gain.value = 0.13; darkGain.connect(bedLP);
+  dawnGain = ctx.createGain(); dawnGain.gain.value = 0.0; dawnGain.connect(bedLP);
+
+  const pad = (freq, node, g, type = 'sine') => {
+    const o = ctx.createOscillator(); o.type = type; o.frequency.value = freq; o.detune.value = Math.random() * 5 - 2.5;
+    const gain = ctx.createGain(); gain.gain.value = g; o.connect(gain); gain.connect(node); o.start();
   };
-  // dark: low fifths
-  mkOsc('sawtooth', 55, darkGain); mkOsc('sawtooth', 82.4, darkGain, 6);
-  // dawn: warm major chord (A C# E) up an octave, gently detuned
-  const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1200; lp.connect(dawnGain);
-  for (const f of [220, 277.2, 329.6]) { const o = ctx.createOscillator(); o.type = 'triangle'; o.frequency.value = f; o.detune.value = (Math.random() * 8 - 4); const g = ctx.createGain(); g.gain.value = 0.33; o.connect(g); g.connect(lp); o.start(); }
+  // dark: a soft low chord (A2 · C3 · E3) — sine, smooth
+  pad(110.0, darkGain, 0.5); pad(130.8, darkGain, 0.34); pad(164.8, darkGain, 0.30);
+  // dawn: a warmer chord an octave up (A3 · C#4 · E4) — triangle, lowpassed
+  pad(220.0, dawnGain, 0.42, 'triangle'); pad(277.2, dawnGain, 0.30, 'triangle'); pad(329.6, dawnGain, 0.28, 'triangle');
 }
 
 /** Call once on a user gesture (click/tap/key). */

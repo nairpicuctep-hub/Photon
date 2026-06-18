@@ -6,7 +6,7 @@ import { EnemyBase } from './EnemyBase.js';
 
 export class Brute extends EnemyBase {
   constructor(def = {}) {
-    super({ height: 92, width: 46, bodyHi: '#2a2040', bodyLo: '#0c0a1a', rimCol: '#ff8a5a', eyeCol: '#ff7a4a', ...def });
+    super({ height: 106, width: 50, bodyHi: '#2a2040', bodyLo: '#0c0a1a', rimCol: '#ff8a5a', eyeCol: '#ff7a4a', ...def });
   }
   drawBody() {
     const lumber = Math.sin(this.t * 3.4) * 2;

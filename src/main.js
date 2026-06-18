@@ -15,6 +15,7 @@ import { BattleScene } from './scenes/BattleScene.js';
 import { MenuScene } from './scenes/MenuScene.js';
 import { ResultScene } from './scenes/ResultScene.js';
 import { CampaignMapScene } from './scenes/CampaignMapScene.js';
+import { HeroGalleryScene } from './scenes/HeroGalleryScene.js';
 import { makeHero, heroClass } from './heroes/roster.js';
 import { recordMission } from './save/save.js';
 import { missionById } from './data/missions.js';
@@ -63,12 +64,14 @@ const nav = {
     }
     scenes.set(new ResultScene(viewport, nav, res, stats));
   },
-  gallery() { location.hash = '#feel'; location.reload(); },
+  gallery() { setChrome(false); scenes.set(new HeroGalleryScene(viewport, nav)); },
 };
 
 // ----- initial route --------------------------------------------------------
 if (params.scene === 'campaign') {
   nav.campaign();
+} else if (params.scene === 'gallery') {
+  nav.gallery();
 } else if (params.mission && missionById(params.mission)) {
   nav.mission(missionById(params.mission));
 } else if (params.scene === 'battle' || params.demo) {

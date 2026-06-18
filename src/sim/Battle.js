@@ -34,6 +34,11 @@ const SIGNATURE = {
   radu: { method: 'toggleAura', cd: 9 }, pissy: { method: 'goodSpirits', cd: 10 },
 };
 
+// Heroes are drawn at full feel-slice scale (the gallery/preview showcase needs
+// that fidelity), but in battle they'd tower over the enemies — so light units
+// render scaled down here, keeping them proportional to the Shadow Network.
+const HERO_SCALE = 0.64;
+
 class Combatant {
   constructor(side, def, renderer, x) {
     this.side = side; this.def = def; this.r = renderer;
@@ -46,7 +51,8 @@ class Combatant {
     this.stun = 0;
     const melee = def.attack && def.attack.kind === 'melee';
     this.hitR = melee ? 38 : (side === 'shadow' ? 26 : 22);
-    this.attackY = FIELD.GROUND - (side === 'light' ? 118 : (def.id === 'nullDrone' ? 90 : 46));
+    this.scale = side === 'light' ? HERO_SCALE : 1;
+    this.attackY = FIELD.GROUND - (side === 'light' ? 118 * HERO_SCALE : (def.id === 'nullDrone' ? 90 : 46));
   }
   get range() { return this.def.attack ? this.def.attack.range : 0; }
 }
@@ -414,7 +420,12 @@ export class Battle {
     // entities back-to-front by x (enemies + allies merged)
     const all = [...this.enemies, ...this.allies].sort((a, b) => a.x - b.x);
     const cb = getSettings().colorblind;
-    for (const c of all) { c.r.draw(); if (c.hp < c.maxHp && !c.dead) this._drawHpBar(c); if (cb && !c.dead) this._drawTag(c); }
+    for (const c of all) {
+      if (c.scale !== 1) { ctx.save(); ctx.translate(c.x, FIELD.GROUND); ctx.scale(c.scale, c.scale); ctx.translate(-c.x, -FIELD.GROUND); c.r.draw(); ctx.restore(); }
+      else c.r.draw();
+      if (c.hp < c.maxHp && !c.dead) this._drawHpBar(c);
+      if (cb && !c.dead) this._drawTag(c);
+    }
     this._drawPrisms();
     this._drawFields();
     this._drawBeams();
@@ -458,7 +469,7 @@ export class Battle {
   // colorblind aid: a letter tag (hero/enemy initial) so units aren't color-only
   _drawTag(c) {
     const letter = ((c.def.name || '?')[0] || '?').toUpperCase();
-    const y = FIELD.GROUND - (c.side === 'light' ? 205 : 118);
+    const y = c.side === 'light' ? FIELD.GROUND - 172 : FIELD.GROUND - ((c.r.h || 64) + (c.r.hover || 0) + 34);
     ctx.save();
     ctx.fillStyle = c.side === 'light' ? 'rgba(255,210,74,0.9)' : 'rgba(176,107,255,0.9)';
     ctx.beginPath(); ctx.arc(c.x, y, 9, 0, 6.28); ctx.fill();
@@ -467,7 +478,8 @@ export class Battle {
   }
 
   _drawHpBar(c) {
-    const w = 36, x = c.x - w / 2, y = FIELD.GROUND - (c.side === 'light' ? 185 : 96);
+    const w = 36, x = c.x - w / 2;
+    const y = c.side === 'light' ? FIELD.GROUND - 158 : FIELD.GROUND - ((c.r.h || 64) + (c.r.hover || 0) + 14);
     const f = clamp(c.hp / c.maxHp, 0, 1);
     ctx.save();
     ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fillRect(x, y, w, 4);

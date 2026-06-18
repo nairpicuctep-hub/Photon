@@ -4,11 +4,13 @@ import { Crawler } from './crawler.js';
 import { Slinger } from './slinger.js';
 import { Brute } from './brute.js';
 import { NullDrone } from './nullDrone.js';
+import { Wraith } from './wraith.js';
+import { Juggernaut } from './juggernaut.js';
 import { Umbra } from './bosses/umbra.js';
 import { DoctorNull } from './bosses/doctorNull.js';
 import { TheVoid } from './bosses/theVoid.js';
 
-const CLASSES = { crawler: Crawler, slinger: Slinger, brute: Brute, nullDrone: NullDrone, umbra: Umbra, doctorNull: DoctorNull, theVoid: TheVoid };
+const CLASSES = { crawler: Crawler, slinger: Slinger, brute: Brute, nullDrone: NullDrone, wraith: Wraith, juggernaut: Juggernaut, umbra: Umbra, doctorNull: DoctorNull, theVoid: TheVoid };
 
 export function makeEnemy(kind, x, groundY) {
   const Cls = CLASSES[kind];
