@@ -20,7 +20,7 @@ export function spawnBolt(o) {
     kind: 'bolt', side: o.side, x: o.x, y: o.y,
     target: o.target, damage: o.damage,
     speed: o.speed || 520, color: o.color || (o.dark ? '#b06bff' : '#ffe28a'),
-    dark: !!o.dark, pierce: !!o.pierce, silence: !!o.silence, r: o.r || 4, life: 0, max: 3,
+    dark: !!o.dark, pierce: !!o.pierce, silence: !!o.silence, ranged: true, r: o.r || 4, life: 0, max: 3,
     onHit: o.onHit, dead: false,
   });
 }
@@ -69,7 +69,7 @@ export function updateProjectiles(dt, battle) {
       p.y = lerp(p.y0, p.ty, k) - Math.sin(k * Math.PI) * p.peak;
       if (k >= 1) {
         p.dead = true;
-        if (battle) battle.splashDamage(p.tx, p.side === 'light' ? 'shadow' : 'light', p.splash, p.damage);
+        if (battle) battle.splashDamage(p.tx, p.side === 'light' ? 'shadow' : 'light', p.splash, p.damage, { ranged: true });
         if (p.onLand) p.onLand(p.tx, p.ty);
       }
     }

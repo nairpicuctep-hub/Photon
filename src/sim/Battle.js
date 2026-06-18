@@ -70,6 +70,7 @@ export class Battle {
     this.lances = [];               // Light Lance megabeam FX
     this.walls = (opts.walls || []).map((w) => ({ x: w.x, top: FIELD.GROUND - (w.height || 240), maxHp: w.hp || 200, hp: w.hp || 200, broken: 0 }));
     this.lockedHeroes = opts.lockedHeroes || []; // "stolen power" — these can't deploy this mission
+    this.biome = opts.biome || null;             // e.g. 'eclipse' tints the battlefield
     this.banner = new ComboBanner();
     this.combo = new ComboEngine(this, this.banner);
     this.economy = new LightEconomy(opts.economy);
@@ -203,11 +204,18 @@ export class Battle {
   }
 
   // ---- damage helpers ------------------------------------------------------
+  /** A Victor prism is deployed -> Mirrors can be hit. */
+  _prismActive() { return this.prisms && this.prisms.length > 0; }
+
   applyDamage(target, dmg, opts = {}) {
     if (!target || target.dead) return;
     let d = dmg;
     if (target.def.traits && target.def.traits.includes('armored') && !opts.antiArmor) d *= 0.5;
     if (target.def.cloaked && (target.r.revealed || 0) < 0.5) d *= 0.15; // must be revealed
+    // Mirror: reflects ranged light unless Victor's prism refracts around it
+    if (target.def.traits && target.def.traits.includes('reflective') && opts.ranged && !this._prismActive()) {
+      d *= 0.12; if (target.r) target.r.reflectFlash = 1;
+    }
     target.hp -= d;
     if (opts.silence && target.side === 'light') target.silenced = 4; // Hexer's curse
     if (target.r.hit) target.r.hit();
@@ -245,6 +253,9 @@ export class Battle {
     // sync + animate renderers
     for (const c of this.allies) { c.r.x = c.x; c.r.groundY = FIELD.GROUND; c.r.update(dt); }
     for (const c of this.enemies) { c.r.x = c.x; c.r.groundY = FIELD.GROUND; c.r.update(dt); }
+    // Mirrors lower their reflection only while a prism is up
+    const prismUp = this._prismActive();
+    for (const e of this.enemies) if (e.r && e.def.traits && e.def.traits.includes('reflective')) e.r.reflectActive = !prismUp;
 
     // aura buffs (reset then apply)
     for (const c of this.allies) c.atkSpeedMul = 1;
@@ -343,7 +354,7 @@ export class Battle {
         // the combo replaces the normal beam this shot
       } else {
         const foes = c.side === 'light' ? this.enemies : this.allies;
-        for (const f of foes) if (!f.dead && Math.sign(f.x - c.x) === dir && Math.abs(f.x - c.x) <= a.range) this.applyDamage(f, dmg, { antiArmor: anti });
+        for (const f of foes) if (!f.dead && Math.sign(f.x - c.x) === dir && Math.abs(f.x - c.x) <= a.range) this.applyDamage(f, dmg, { antiArmor: anti, ranged: true });
         this.beams.push({ x1: c.x, y: c.attackY, x2: c.x + dir * a.range, life: 0, max: 0.22, dark: c.side === 'shadow' });
       }
     } else if (a.kind === 'arc') {
@@ -448,6 +459,7 @@ export class Battle {
   // ---- rendering -----------------------------------------------------------
   render(dt) {
     drawScene(dt);
+    if (this.biome === 'eclipse') this._drawEclipse();
     this._drawTower();
     this._drawCore();
     this._drawWalls();
@@ -540,6 +552,19 @@ export class Battle {
       ctx.strokeStyle = g; ctx.lineCap = 'round'; ctx.lineWidth = 9 * a + 3; ctx.beginPath(); ctx.moveTo(b.x1, b.y); ctx.lineTo(b.x2, b.y); ctx.stroke();
       ctx.restore();
     }
+  }
+
+  _drawEclipse() {
+    const x = FIELD.W * 0.62, y = FIELD.GROUND - 50;
+    ctx.save();
+    ctx.fillStyle = 'rgba(38,18,66,0.30)'; ctx.fillRect(0, 0, FIELD.W, FIELD.GROUND + 30); // violet sky tint
+    ctx.globalCompositeOperation = 'lighter';
+    glow(x, y, 150, '#b06bff', 0.30); glow(x, y, 90, '#dca6ff', 0.22); // corona
+    ctx.restore();
+    ctx.save();
+    ctx.fillStyle = '#0a0716'; ctx.beginPath(); ctx.arc(x, y, 60, 0, 6.28); ctx.fill(); // dark disc
+    ctx.strokeStyle = rgba('#c9a6ff', 0.8); ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(x, y, 60, 0, 6.28); ctx.stroke();
+    ctx.restore();
   }
 
   _drawWalls() {

@@ -153,6 +153,66 @@ export const MISSIONS = [
         { enemyId: 'umbra', count: 1, atTime: 24 },
       ] },
     },
+    reward: { unlock: 'm3_1' },
+  },
+
+  // ===== Act III — Eclipse =====
+  {
+    id: 'm3_1', act: 3, name: 'Eclipse', teaches: null,
+    blurb: 'Under the eclipse, Mirror-shadows reflect your light — raw fire bounces off. Deploy Victor: his Prism refracts around them so your attacks land.',
+    opts: {
+      biome: 'eclipse', coreHp: 100, towerHp: 170,
+      waves: { mode: 'script', firstDelay: 2.5, script: [
+        { enemyId: 'crawler', count: 3, atTime: 2 },
+        { enemyId: 'mirror', count: 1, atTime: 9 },
+        { enemyId: 'slinger', count: 2, atTime: 17 },
+        { enemyId: 'mirror', count: 2, atTime: 25 },
+      ] },
+    },
+    reward: { unlock: 'm3_2' },
+  },
+  {
+    id: 'm3_2', act: 3, name: 'Hall of Mirrors',
+    blurb: 'A wall of Mirrors, guarded by Hexers that silence your prism-maker. Keep Pissy near Victor — Good Spirits cleanses the curse so the Prism stays up.',
+    opts: {
+      biome: 'eclipse', coreHp: 110, towerHp: 150,
+      waves: { mode: 'script', firstDelay: 1.5, script: [
+        { enemyId: 'mirror', count: 2, atTime: 2 },
+        { enemyId: 'hexer', count: 2, atTime: 8 },
+        { enemyId: 'mirror', count: 3, atTime: 16 },
+        { enemyId: 'brute', count: 1, atTime: 24 },
+      ] },
+    },
+    reward: { unlock: 'm3_3' },
+  },
+  {
+    id: 'm3_3', act: 3, name: 'Shattered Light',
+    blurb: 'Mirrors AND armored Juggernauts, and Radu is still powerless. Victor breaks the mirrors, Manu cracks the armor — win it as a team, without the leader.',
+    opts: {
+      biome: 'eclipse', coreHp: 120, towerHp: 160, lockedHeroes: ['radu'],
+      waves: { mode: 'script', firstDelay: 1.5, script: [
+        { enemyId: 'mirror', count: 2, atTime: 2 },
+        { enemyId: 'juggernaut', count: 1, atTime: 8 },
+        { enemyId: 'mirror', count: 2, atTime: 16 },
+        { enemyId: 'juggernaut', count: 1, atTime: 24 },
+        { enemyId: 'hexer', count: 2, atTime: 30 },
+      ] },
+    },
+    reward: { unlock: 'm3_4' },
+  },
+  {
+    id: 'm3_4', act: 3, name: 'Eclipse’s End', objective: 'boss',
+    blurb: 'The eclipse breaks — but The Void reforms one last time, shielded by Mirrors and elites. Reveal it, refract the mirrors, smash the armor, and bring back the dawn.',
+    opts: {
+      biome: 'eclipse', coreHp: 90, towerHp: 170,
+      waves: { mode: 'script', firstDelay: 1.5, script: [
+        { enemyId: 'mirror', count: 3, atTime: 1 },
+        { enemyId: 'hexer', count: 2, atTime: 7 },
+        { enemyId: 'juggernaut', count: 1, atTime: 12 },
+        { enemyId: 'wraith', count: 3, atTime: 16 },
+        { enemyId: 'theVoid', count: 1, atTime: 22 },
+      ] },
+    },
     reward: { unlock: null },
   },
 ];
@@ -160,6 +220,7 @@ export const MISSIONS = [
 export const ACTS = {
   1: { name: 'The First Light', eyebrow: 'ACT I' },
   2: { name: 'The Null Tide', eyebrow: 'ACT II' },
+  3: { name: 'Eclipse', eyebrow: 'ACT III' },
 };
 
 export function missionById(id) { return MISSIONS.find((m) => m.id === id); }

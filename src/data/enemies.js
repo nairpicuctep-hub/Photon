@@ -38,6 +38,11 @@ export const ENEMY_DEFS = {
     attack: { damage: 6, range: 340, cooldown: 2.4, kind: 'bolt' },
     traits: ['silencer'], height: 80,
   },
+  mirror: {
+    id: 'mirror', name: 'Mirror', maxHp: 90, moveSpeed: 40,
+    attack: { damage: 12, range: 70, cooldown: 1.4, kind: 'melee' },
+    traits: ['reflective'], height: 92,
+  },
   // --- bosses (M4+) ---
   umbra: {
     id: 'umbra', name: 'Umbra', maxHp: 900, moveSpeed: 26,
