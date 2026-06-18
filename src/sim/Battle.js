@@ -38,7 +38,7 @@ const SIGNATURE = {
 // Heroes are drawn at full feel-slice scale (the gallery/preview showcase needs
 // that fidelity), but in battle they'd tower over the enemies — so light units
 // render scaled down here, keeping them proportional to the Shadow Network.
-const HERO_SCALE = 0.64;
+const HERO_SCALE = 0.5;
 
 class Combatant {
   constructor(side, def, renderer, x) {

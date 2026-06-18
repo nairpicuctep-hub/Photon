@@ -18,8 +18,9 @@ import { CampaignMapScene } from './scenes/CampaignMapScene.js';
 import { HeroGalleryScene } from './scenes/HeroGalleryScene.js';
 import { ModeSelectScene } from './scenes/ModeSelectScene.js';
 import { TopScoresScene } from './scenes/TopScoresScene.js';
+import { ComicIntroScene } from './scenes/ComicIntroScene.js';
 import { makeHero, heroClass } from './heroes/roster.js';
-import { recordMission, recordSurvival, addScore, getName, get as getSave } from './save/save.js';
+import { recordMission, recordSurvival, addScore, getName, hasSeenIntro, markIntroSeen, get as getSave } from './save/save.js';
 import { askName } from './ui/namePrompt.js';
 import { missionById } from './data/missions.js';
 import { clamp } from './render/primitives.js';
@@ -56,6 +57,7 @@ const nav = {
   campaign() { setChrome(false); scenes.set(new CampaignMapScene(viewport, nav)); },
   modes() { setChrome(false); scenes.set(new ModeSelectScene(viewport, nav)); },
   topScores(back) { setChrome(false); scenes.set(new TopScoresScene(viewport, nav, back)); },
+  intro(after, start) { setChrome(false); scenes.set(new ComicIntroScene(viewport, nav, after || (() => { markIntroSeen(); nav.menu(); }), start)); },
   survival() { nav.battle({ mode: 'survival', towerHp: 130 }); },
   bossRush() {
     nav.battle({ mode: 'bossrush', towerHp: 170, waves: { mode: 'script', firstDelay: 2, script: [
@@ -102,6 +104,8 @@ if (params.scene === 'campaign') {
   nav.bossRush();
 } else if (params.scene === 'top') {
   nav.topScores(() => nav.menu());
+} else if (params.scene === 'intro') {
+  nav.intro(() => { markIntroSeen(); nav.menu(); }, params.panel != null ? +params.panel : 0);
 } else if (params.mission && missionById(params.mission)) {
   nav.mission(missionById(params.mission));
 } else if (params.scene === 'battle' || params.demo) {
@@ -120,7 +124,9 @@ if (params.scene === 'campaign') {
   rebuildControls(scene, hero);
 } else {
   nav.menu();
-  if (!getName()) askName(); // first launch: ask the player's name
+  // first launch: ask the player's name, then play the origin intro
+  const showIntro = () => { if (!hasSeenIntro()) nav.intro(() => { markIntroSeen(); nav.menu(); }); };
+  if (!getName()) askName(showIntro); else showIntro();
 }
 
 // ----- Radu feel-slice controls ---------------------------------------------

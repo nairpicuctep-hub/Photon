@@ -14,7 +14,7 @@ function freshSave() {
     unlocked: { heroes: ['trooper', 'radu', 'victor', 'manu', 'floris', 'andreea', 'pissy'], combos: ['light_lance'], upgrades: [] },
     settings: {},                 // merged A11y + Audio settings live here
     stats: { kills: 0, combosTriggered: {}, wins: 0, bestSurvival: 0 },
-    player: { name: '' },
+    player: { name: '', seenIntro: false },
     scores: [],               // leaderboard: [{ name, score, time, diff }]
   };
 }
@@ -65,6 +65,8 @@ export function isMissionCleared(missionId) { return state.campaign.some((c) => 
 export function missionStars(missionId) { const e = state.campaign.find((c) => c.missionId === missionId); return e ? e.stars : 0; }
 
 export function getName() { return (state.player && state.player.name) || ''; }
+export function hasSeenIntro() { return !!(state.player && state.player.seenIntro); }
+export function markIntroSeen() { state.player = state.player || {}; state.player.seenIntro = true; save(); }
 export function setName(name) { state.player = state.player || {}; state.player.name = String(name || '').trim().slice(0, 16); save(); }
 
 /** Add a leaderboard entry; returns its 1-based rank, or 0 if it missed the top 12. */
