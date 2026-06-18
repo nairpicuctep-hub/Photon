@@ -69,6 +69,7 @@ export class Battle {
     this.prisms = [];               // Victor's deployed Prism Mirrors
     this.lances = [];               // Light Lance megabeam FX
     this.walls = (opts.walls || []).map((w) => ({ x: w.x, top: FIELD.GROUND - (w.height || 240), maxHp: w.hp || 200, hp: w.hp || 200, broken: 0 }));
+    this.lockedHeroes = opts.lockedHeroes || []; // "stolen power" — these can't deploy this mission
     this.banner = new ComboBanner();
     this.combo = new ComboEngine(this, this.banner);
     this.economy = new LightEconomy(opts.economy);
@@ -161,13 +162,16 @@ export class Battle {
   }
 
   // ---- deployment ----------------------------------------------------------
+  isLocked(id) { return this.lockedHeroes && this.lockedHeroes.includes(id); }
   canDeploy(id) {
     const def = heroDef(id); if (!def) return false;
+    if (this.isLocked(id)) return false;
     if (!this.economy.canAfford(def.cost)) return false;
     return (this._deployCd && this._deployCd[id] > 0) ? false : true;
   }
   deploy(id) {
     const def = heroDef(id); if (!def) return false;
+    if (this.isLocked(id)) return false; // power stolen this mission
     if (this._deployCd && this._deployCd[id] > 0) return false; // respect per-hero cooldown on all paths
     if (!this.economy.spend(def.cost)) return false;
     const x = FIELD.BASE_X + 44;

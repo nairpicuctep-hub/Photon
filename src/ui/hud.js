@@ -67,9 +67,10 @@ function bar(x, y, w, h, f, col, label, right) {
 
 function drawCard(battle, card, selectedId) {
   const def = HERO_DEFS[card.id];
+  const locked = battle.isLocked && battle.isLocked(card.id);
   const afford = battle.economy.canAfford(def.cost);
   const cdF = battle.deployCooldownFrac(card.id);
-  const ready = afford && cdF <= 0;
+  const ready = afford && cdF <= 0 && !locked;
   ctx.save();
   // card body
   ctx.globalAlpha = ready ? 1 : 0.55;
@@ -89,7 +90,13 @@ function drawCard(battle, card, selectedId) {
   ctx.fillStyle = rgba('#000', 0.4); ctx.beginPath(); ctx.roundRect(card.x + card.w - 22, card.y + 6, 16, 16, 4); ctx.fill();
   ctx.fillStyle = '#cfd6ff'; ctx.font = '700 11px system-ui,sans-serif'; ctx.fillText(card.key, card.x + card.w - 18, card.y + 18);
   // cooldown overlay
-  if (cdF > 0) { ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.beginPath(); ctx.roundRect(card.x, card.y, card.w, card.h * cdF, 10); ctx.fill(); }
+  if (cdF > 0 && !locked) { ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.beginPath(); ctx.roundRect(card.x, card.y, card.w, card.h * cdF, 10); ctx.fill(); }
+  // locked ("power stolen") overlay
+  if (locked) {
+    ctx.fillStyle = 'rgba(8,6,16,0.66)'; ctx.beginPath(); ctx.roundRect(card.x, card.y, card.w, card.h, 10); ctx.fill();
+    ctx.fillStyle = '#b06bff'; ctx.font = '700 11px system-ui,sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText('🔒 STOLEN', card.x + card.w / 2, card.y + card.h / 2 + 4); ctx.textAlign = 'left';
+  }
   ctx.restore();
 }
 

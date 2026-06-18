@@ -79,7 +79,7 @@ export const MISSIONS = [
   },
   {
     id: 'm1_6', act: 1, name: 'The Void', objective: 'boss',
-    blurb: 'The finale. The Void is cloaked AND armored AND radiates fear — only every friendship at once breaks it. Reveal it, smash its armor, and end the dark.',
+    blurb: 'The finale of Act I. The Void is cloaked AND armored AND radiates fear — only every friendship at once breaks it. Reveal it, smash its armor, and end the dark.',
     opts: {
       coreHp: 70, towerHp: 150,
       waves: { mode: 'script', firstDelay: 1.5, script: [
@@ -91,9 +91,80 @@ export const MISSIONS = [
         { enemyId: 'theVoid', count: 1, atTime: 20 },
       ] },
     },
+    reward: { unlock: 'm2_1' },
+  },
+
+  // ===== Act II — The Null Tide =====
+  {
+    id: 'm2_1', act: 2, name: 'The Null Tide', teaches: null,
+    blurb: 'Doctor Null’s curse spreads. Hexers now silence a hero’s power on hit — keep Pissy near to cleanse your friends with Good Spirits.',
+    opts: {
+      coreHp: 100, towerHp: 130,
+      waves: { mode: 'script', firstDelay: 1.5, script: [
+        { enemyId: 'crawler', count: 4, atTime: 1 },
+        { enemyId: 'hexer', count: 2, atTime: 6 },
+        { enemyId: 'slinger', count: 3, atTime: 13 },
+        { enemyId: 'hexer', count: 2, atTime: 20 },
+        { enemyId: 'brute', count: 1, atTime: 24 },
+      ] },
+    },
+    reward: { unlock: 'm2_2' },
+  },
+  {
+    id: 'm2_2', act: 2, name: 'Stolen Light',
+    blurb: 'Doctor Null has stolen Radu’s power — the leader cannot deploy. Prove the team is stronger than any one hero. Hold the line together.',
+    opts: {
+      coreHp: 100, towerHp: 140, lockedHeroes: ['radu'],
+      waves: { mode: 'script', firstDelay: 1.5, script: [
+        { enemyId: 'wraith', count: 3, atTime: 2 },
+        { enemyId: 'slinger', count: 3, atTime: 8 },
+        { enemyId: 'hexer', count: 2, atTime: 14 },
+        { enemyId: 'brute', count: 2, atTime: 20 },
+        { enemyId: 'wraith', count: 3, atTime: 26 },
+      ] },
+    },
+    reward: { unlock: 'm2_3' },
+  },
+  {
+    id: 'm2_3', act: 2, name: 'The Iron Wall',
+    blurb: 'A siege of armored Juggernauts — raw fire barely scratches them. Bring Manu: his anti-armor Titan Smash is the only thing that cracks their plates.',
+    opts: {
+      coreHp: 110, towerHp: 150, lockedHeroes: ['andreea'],
+      waves: { mode: 'script', firstDelay: 1.5, script: [
+        { enemyId: 'crawler', count: 5, atTime: 1 },
+        { enemyId: 'juggernaut', count: 1, atTime: 8 },
+        { enemyId: 'slinger', count: 3, atTime: 14 },
+        { enemyId: 'juggernaut', count: 2, atTime: 22 },
+        { enemyId: 'brute', count: 2, atTime: 30 },
+      ] },
+    },
+    reward: { unlock: 'm2_4' },
+  },
+  {
+    id: 'm2_4', act: 2, name: 'The Gathering Dark', objective: 'boss',
+    blurb: 'The Shadow Network throws everything at you — its elite Wraiths, Hexers and Juggernauts, and a reforged Umbra. Every friendship, all at once.',
+    opts: {
+      coreHp: 90, towerHp: 160,
+      waves: { mode: 'script', firstDelay: 1.5, script: [
+        { enemyId: 'wraith', count: 3, atTime: 1 },
+        { enemyId: 'hexer', count: 2, atTime: 7 },
+        { enemyId: 'juggernaut', count: 1, atTime: 12 },
+        { enemyId: 'brute', count: 2, atTime: 18 },
+        { enemyId: 'umbra', count: 1, atTime: 24 },
+      ] },
+    },
     reward: { unlock: null },
   },
 ];
 
+export const ACTS = {
+  1: { name: 'The First Light', eyebrow: 'ACT I' },
+  2: { name: 'The Null Tide', eyebrow: 'ACT II' },
+};
+
 export function missionById(id) { return MISSIONS.find((m) => m.id === id); }
 export function actMissions(act) { return MISSIONS.filter((m) => m.act === act); }
+export function acts() { return [...new Set(MISSIONS.map((m) => m.act))]; }
+/** Global-order unlock: first mission is open; others unlock when the prior one is cleared. */
+export function missionIndex(id) { return MISSIONS.findIndex((m) => m.id === id); }
+export function prevMission(id) { const i = missionIndex(id); return i > 0 ? MISSIONS[i - 1] : null; }
