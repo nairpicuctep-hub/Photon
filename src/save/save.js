@@ -1,8 +1,6 @@
 // save.js — versioned SaveState in localStorage with a migrate() for forward
 // compatibility (brief §11). No secrets. Includes a reset.
 
-import { upgradeForClearCount } from '../data/upgrades.js';
-
 const KEY = 'echipa-lumina:save';
 const VERSION = 1;
 
@@ -12,6 +10,7 @@ function freshSave() {
     version: VERSION,
     campaign: [],                 // [{ missionId, stars }]
     unlocked: { heroes: ['trooper', 'radu', 'victor', 'manu', 'floris', 'andreea', 'pissy'], combos: ['light_lance'], upgrades: [] },
+    lightPoints: 0,           // earned by clearing missions; spent in the Light Codex
     settings: {},                 // merged A11y + Audio settings live here
     stats: { kills: 0, combosTriggered: {}, wins: 0, bestSurvival: 0 },
     player: { name: '', seenIntro: false },
@@ -51,14 +50,24 @@ export function save() {
 /** Record a mission result; keeps the best star rating. */
 export function recordMission(missionId, stars, won) {
   const entry = state.campaign.find((c) => c.missionId === missionId);
+  const firstClear = !entry && won && stars > 0;
   if (entry) entry.stars = Math.max(entry.stars, stars);
   else state.campaign.push({ missionId, stars });
   if (won) state.stats.wins++;
-  // friendship meta: each newly cleared mission grants the next upgrade
-  const cleared = state.campaign.filter((c) => c.stars > 0).length;
-  const up = upgradeForClearCount(cleared);
-  if (up && !state.unlocked.upgrades.includes(up)) state.unlocked.upgrades.push(up);
+  // earn Light points on first clear, to spend in the Light Codex
+  if (firstClear) state.lightPoints = (state.lightPoints || 0) + 1 + stars;
   save();
+}
+
+export function getLightPoints() { return state.lightPoints || 0; }
+export function hasUpgrade(id) { return (state.unlocked.upgrades || []).includes(id); }
+/** Spend points to unlock an upgrade. Returns true on success. */
+export function unlockUpgrade(id, cost) {
+  if (hasUpgrade(id) || (state.lightPoints || 0) < cost) return false;
+  state.lightPoints -= cost;
+  state.unlocked.upgrades.push(id);
+  save();
+  return true;
 }
 
 export function isMissionCleared(missionId) { return state.campaign.some((c) => c.missionId === missionId && c.stars > 0); }

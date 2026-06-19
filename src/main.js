@@ -19,6 +19,7 @@ import { HeroGalleryScene } from './scenes/HeroGalleryScene.js';
 import { ModeSelectScene } from './scenes/ModeSelectScene.js';
 import { TopScoresScene } from './scenes/TopScoresScene.js';
 import { ComicIntroScene } from './scenes/ComicIntroScene.js';
+import { UpgradeScene } from './scenes/UpgradeScene.js';
 import { makeHero, heroClass } from './heroes/roster.js';
 import { recordMission, recordSurvival, addScore, getName, hasSeenIntro, markIntroSeen, get as getSave } from './save/save.js';
 import { askName } from './ui/namePrompt.js';
@@ -58,6 +59,7 @@ const nav = {
   modes() { setChrome(false); scenes.set(new ModeSelectScene(viewport, nav)); },
   topScores(back) { setChrome(false); scenes.set(new TopScoresScene(viewport, nav, back)); },
   intro(after, start) { setChrome(false); scenes.set(new ComicIntroScene(viewport, nav, after || (() => { markIntroSeen(); nav.menu(); }), start)); },
+  upgrades(back) { setChrome(false); scenes.set(new UpgradeScene(viewport, nav, back)); },
   survival() { nav.battle({ mode: 'survival', towerHp: 130 }); },
   bossRush() {
     nav.battle({ mode: 'bossrush', towerHp: 170, waves: { mode: 'script', firstDelay: 2, script: [
@@ -106,6 +108,8 @@ if (params.scene === 'campaign') {
   nav.topScores(() => nav.menu());
 } else if (params.scene === 'intro') {
   nav.intro(() => { markIntroSeen(); nav.menu(); }, params.panel != null ? +params.panel : 0);
+} else if (params.scene === 'upgrades') {
+  nav.upgrades(() => nav.menu());
 } else if (params.mission && missionById(params.mission)) {
   nav.mission(missionById(params.mission));
 } else if (params.scene === 'battle' || params.demo) {

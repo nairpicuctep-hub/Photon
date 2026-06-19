@@ -6,7 +6,7 @@ import { initScene, drawScene, setDawn, drawVignette } from '../render/scene.js'
 import { reduce } from '../core/env.js';
 import { makeButton, bindButtons } from '../ui/widgets.js';
 import { openSettings } from '../ui/settingsPanel.js';
-import { getName } from '../save/save.js';
+import { getName, getLightPoints } from '../save/save.js';
 
 export class MenuScene {
   constructor(viewport, nav) {
@@ -17,12 +17,14 @@ export class MenuScene {
     this.viewport.setLogical(1280, 720);
     initScene({ W: 1280, H: 720, GROUND: 566, reduce });
     setDawn(0.55);
-    const cx = 640, w = 300, h = 58, gap = 14; let y = 312;
+    const cx = 640, w = 300, h = 54, gap = 12; let y = 300;
+    const pts = getLightPoints();
     this.buttons = [
-      makeButton({ x: cx - w / 2, y, w, h, label: 'Campaign', sub: 'Act I — The First Light', primary: true, onClick: () => this.nav.campaign() }),
+      makeButton({ x: cx - w / 2, y, w, h, label: 'Campaign', sub: 'The light-side story', primary: true, onClick: () => this.nav.campaign() }),
       makeButton({ x: cx - w / 2, y: y + (h + gap), w, h, label: 'Play', sub: 'Survival & Boss Rush', onClick: () => this.nav.modes() }),
-      makeButton({ x: cx - w / 2, y: y + (h + gap) * 2, w, h, label: 'Hero Gallery', sub: 'Meet Echipa Lumina', onClick: () => this.nav.gallery() }),
-      makeButton({ x: cx - w / 2, y: y + (h + gap) * 3, w, h, label: 'Settings', sub: 'Audio & accessibility', onClick: () => openSettings() }),
+      makeButton({ x: cx - w / 2, y: y + (h + gap) * 2, w, h, label: 'Light Codex', sub: pts ? `✦ ${pts} Light to spend` : 'Friendship upgrades', onClick: () => this.nav.upgrades() }),
+      makeButton({ x: cx - w / 2, y: y + (h + gap) * 3, w, h, label: 'Hero Gallery', sub: 'Meet Echipa Lumina', onClick: () => this.nav.gallery() }),
+      makeButton({ x: cx - w / 2, y: y + (h + gap) * 4, w, h, label: 'Settings', sub: 'Audio & accessibility', onClick: () => openSettings() }),
     ];
     const canvas = document.getElementById('c');
     this._unbind = bindButtons(canvas, this.viewport, () => this.buttons);

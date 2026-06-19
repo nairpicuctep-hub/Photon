@@ -50,6 +50,7 @@ export class CampaignMapScene {
     if (ai > 0) this.buttons.push(makeButton({ x: 28, y: 338, w: 56, h: 66, label: '◄', primary: true, onClick: () => { this.act = this.actList[ai - 1]; this._build(); } }));
     if (ai < this.actList.length - 1) this.buttons.push(makeButton({ x: 1196, y: 338, w: 56, h: 66, label: '►', primary: true, onClick: () => { this.act = this.actList[ai + 1]; this._build(); } }));
     this.buttons.push(makeButton({ x: 40, y: 648, w: 150, h: 44, label: '← Menu', fontSize: 16, onClick: () => this.nav.menu() }));
+    this.buttons.push(makeButton({ x: 1090, y: 648, w: 150, h: 44, label: '✦ Light Codex', fontSize: 14, onClick: () => this.nav.upgrades(() => this.nav.campaign()) }));
   }
 
   render(dt) {
