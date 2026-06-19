@@ -19,12 +19,18 @@ export class WaveDirector {
       let pending = false;
       for (let i = 0; i < this.script.length; i++) {
         const e = this.script[i];
-        if (this.elapsed >= e.atTime && this._fired[i] < e.count) {
-          // drip the count out over ~0.5s each
-          const due = Math.min(e.count, Math.floor((this.elapsed - e.atTime) / 0.5) + 1);
-          while (this._fired[i] < due) { battle.spawnEnemy(e.enemyId); this._fired[i]++; }
+        const count = e.count || 1;
+        if (this.elapsed >= e.atTime && this._fired[i] < count) {
+          if (e.banner) { // a phase callout, not a spawn
+            if (this._fired[i] === 0 && battle.banner) battle.banner.show(e.banner);
+            this._fired[i] = count;
+          } else {
+            // drip the spawn count out over ~0.5s each
+            const due = Math.min(count, Math.floor((this.elapsed - e.atTime) / 0.5) + 1);
+            while (this._fired[i] < due) { battle.spawnEnemy(e.enemyId); this._fired[i]++; }
+          }
         }
-        if (this._fired[i] < e.count) pending = true;
+        if (this._fired[i] < count) pending = true;
       }
       this.done = !pending;
       return;

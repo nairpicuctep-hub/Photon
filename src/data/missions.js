@@ -213,6 +213,46 @@ export const MISSIONS = [
         { enemyId: 'theVoid', count: 1, atTime: 22 },
       ] },
     },
+    reward: { unlock: 'm4_1' },
+  },
+
+  // ===== Act IV — Into the Void (finale) =====
+  {
+    id: 'm4_1', act: 4, name: 'The Long Dark', objective: 'boss',
+    blurb: 'The Shadow Network empties its arsenal — every elite at once. Hold, adapt, and carve a path to the Void’s heart.',
+    opts: {
+      biome: 'eclipse', coreHp: 130, towerHp: 180,
+      waves: { mode: 'script', firstDelay: 1.5, script: [
+        { enemyId: 'crawler', count: 5, atTime: 1 },
+        { enemyId: 'hexer', count: 2, atTime: 6 },
+        { enemyId: 'mirror', count: 2, atTime: 12 },
+        { enemyId: 'wraith', count: 3, atTime: 18 },
+        { enemyId: 'juggernaut', count: 1, atTime: 24 },
+        { enemyId: 'nullDrone', count: 1, atTime: 28 },
+        { enemyId: 'brute', count: 2, atTime: 34 },
+      ] },
+    },
+    reward: { unlock: 'm4_2' },
+  },
+  {
+    id: 'm4_2', act: 4, name: 'Into the Void', objective: 'boss', finale: true,
+    blurb: 'The final dark. The Void rises in full — survive every phase, break it with all your friendships at once, and bring back the dawn forever.',
+    opts: {
+      biome: 'eclipse', mode: 'bossrush', towerHp: 220,
+      waves: { mode: 'script', firstDelay: 1.5, script: [
+        { banner: { title: 'INTO THE VOID', subtitle: 'The last darkness', caption: 'Every friendship, one final time.', c1: '#b06bff', c2: '#6a5acd' }, atTime: 0.5 },
+        { enemyId: 'crawler', count: 5, atTime: 2 },
+        { enemyId: 'wraith', count: 3, atTime: 6 },
+        { enemyId: 'theVoid', count: 1, atTime: 12 },
+        { banner: { title: '✦ PHASE II', subtitle: 'The Swarm', caption: 'Hold the line — together.', c1: '#ff8a5a', c2: '#b06bff' }, atTime: 22 },
+        { enemyId: 'juggernaut', count: 1, atTime: 24 },
+        { enemyId: 'mirror', count: 2, atTime: 28 },
+        { enemyId: 'hexer', count: 2, atTime: 34 },
+        { banner: { title: '✦ PHASE III', subtitle: 'Break the Dark', caption: 'Bring back the dawn.', c1: '#ffd24a', c2: '#fff7d6' }, atTime: 42 },
+        { enemyId: 'wraith', count: 3, atTime: 44 },
+        { enemyId: 'brute', count: 2, atTime: 50 },
+      ] },
+    },
     reward: { unlock: null },
   },
 ];
@@ -221,6 +261,7 @@ export const ACTS = {
   1: { name: 'The First Light', eyebrow: 'ACT I' },
   2: { name: 'The Null Tide', eyebrow: 'ACT II' },
   3: { name: 'Eclipse', eyebrow: 'ACT III' },
+  4: { name: 'Into the Void', eyebrow: 'ACT IV' },
 };
 
 export function missionById(id) { return MISSIONS.find((m) => m.id === id); }

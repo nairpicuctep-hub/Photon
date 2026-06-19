@@ -20,6 +20,7 @@ import { ModeSelectScene } from './scenes/ModeSelectScene.js';
 import { TopScoresScene } from './scenes/TopScoresScene.js';
 import { ComicIntroScene } from './scenes/ComicIntroScene.js';
 import { UpgradeScene } from './scenes/UpgradeScene.js';
+import { EndingScene } from './scenes/EndingScene.js';
 import { makeHero, heroClass } from './heroes/roster.js';
 import { recordMission, recordSurvival, addScore, getName, hasSeenIntro, markIntroSeen, get as getSave } from './save/save.js';
 import { askName } from './ui/namePrompt.js';
@@ -74,14 +75,17 @@ const nav = {
   },
   mission(m) {
     setChrome(false);
-    scenes.set(new BattleScene(viewport, { ...m.opts, mode: 'campaign', onResult: (res, stats) => nav.result(res, { ...stats, mode: 'campaign', mission: m }) }));
+    const mode = (m.opts && m.opts.mode) || 'campaign';
+    scenes.set(new BattleScene(viewport, { ...m.opts, mode, onResult: (res, stats) => nav.result(res, { ...stats, mode: 'campaign', mission: m }) }));
   },
+  ending() { setChrome(false); scenes.set(new EndingScene(viewport, nav)); },
   result(res, stats) {
     setChrome(false);
     if (stats.mission && res === 'won') {
       const stars = clamp(1 + Math.floor((stats.kills || 0) / 10), 1, 3);
       recordMission(stats.mission.id, stars, true);
       stats.stars = stars;
+      if (stats.mission.finale) { nav.ending(); return; } // roll the victory outro
     }
     if (stats.mode === 'survival') {
       stats.newBest = recordSurvival(stats.score || 0);
@@ -110,6 +114,8 @@ if (params.scene === 'campaign') {
   nav.intro(() => { markIntroSeen(); nav.menu(); }, params.panel != null ? +params.panel : 0);
 } else if (params.scene === 'upgrades') {
   nav.upgrades(() => nav.menu());
+} else if (params.scene === 'ending') {
+  nav.ending();
 } else if (params.mission && missionById(params.mission)) {
   nav.mission(missionById(params.mission));
 } else if (params.scene === 'battle' || params.demo) {
