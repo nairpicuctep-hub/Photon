@@ -319,10 +319,12 @@ export class Battle {
     } else if (reachStruct && (!target || Math.abs(target.x - c.x) > c.range)) {
       this._attackStructure(c, struct, dt);
     } else {
-      // a combo-gated wall blocks the LIGHT advance (only Light Lance breaks it)
+      // The Dark Wall blocks the LIGHT advance. The Light Lance (Radu × Victor's
+      // prism) shatters it instantly — the taught combo. But any blocked unit also
+      // chips it down with normal fire, so the lane is never a permanent dead-end.
       if (dir > 0) {
         const wall = this.walls.find((w) => w.hp > 0 && w.x > c.x && c.x >= w.x - 54);
-        if (wall) { c.attacking = false; if (c.r.setState && this._isContinuous(c)) c.r.setState('idle'); return; }
+        if (wall) { this._attackWall(c, wall, dt); return; }
       }
       // advance
       c.x += dir * c.def.moveSpeed * dt;
@@ -374,6 +376,26 @@ export class Battle {
     const dmg = a.damage * (c.dmgMul || 1);
     if (struct.isCore) { this.coreHp = Math.max(0, this.coreHp - dmg); this.flash = Math.min(1, this.flash + 0.06); particles.emitPhotons(reduce ? 3 : 8, FIELD.CORE_X - 30, FIELD.GROUND - 70, 120, 20); }
     else { this.towerHp = Math.max(0, this.towerHp - dmg); this.shake = Math.max(this.shake, 6); }
+  }
+
+  // A blocked unit attacks the Dark Wall. Radu refracts through Victor's prism to
+  // shatter it instantly (the Light Lance combo); everyone else chips it down.
+  _attackWall(c, wall, dt) {
+    c.attacking = true;
+    if (c.r.setState && this._isContinuous(c)) c.r.setState('idle');
+    if (c.atkCd > 0) return;
+    const a = c.def.attack; if (!a || a.kind === 'none') return;
+    c.atkCd = a.cooldown / c.atkSpeedMul;
+    // Radu's beam through a prism becomes the wall-shattering Light Lance.
+    if (c.def.id === 'radu' && a.kind === 'beam' && this.combo.tryLightLance(c, 1)) return;
+    const anti = c.def.id === 'manu' || (c.def.tags && c.def.tags.includes('anti_armor'));
+    const dmg = a.damage * (c.dmgMul || 1) * (anti ? 1.5 : 1); // anti-armor cracks it faster
+    const anim = ATTACK_ANIM[c.def.id];
+    if (anim && typeof c.r[anim] === 'function') c.r[anim]();
+    if (a.kind === 'beam' || a.kind === 'bolt' || a.kind === 'arc') this.beams.push({ x1: c.x, y: c.attackY, x2: wall.x, life: 0, max: 0.16, dark: false });
+    // breakWall zeroes the hp and plays the shatter FX — call it while hp is still
+    // positive so it doesn't early-return on the killing blow.
+    if (wall.hp - dmg <= 0) this.breakWall(wall); else wall.hp -= dmg;
   }
 
   _fireSignature(c, method) {
@@ -578,6 +600,12 @@ export class Battle {
       ctx.beginPath(); ctx.roundRect(x - 16, top, 32, gy - top, 6); ctx.fill(); ctx.stroke();
       ctx.strokeStyle = rgba('#b47bff', 0.6 + Math.sin(this.time * 3) * 0.2); ctx.lineWidth = 2;
       ctx.beginPath(); ctx.moveTo(x - 2, top + 24); ctx.lineTo(x - 8, gy - 60); ctx.lineTo(x + 4, gy - 14); ctx.stroke();
+      // damage bar — appears once the wall is taking hits, so it reads as breakable
+      if (w.hp < w.maxHp) {
+        const bw = 44, frac = clamp(w.hp / w.maxHp, 0, 1);
+        ctx.fillStyle = 'rgba(10,7,22,0.7)'; ctx.beginPath(); ctx.roundRect(x - bw / 2, top - 14, bw, 6, 3); ctx.fill();
+        ctx.fillStyle = rgba('#b47bff', 0.95); ctx.beginPath(); ctx.roundRect(x - bw / 2, top - 14, bw * frac, 6, 3); ctx.fill();
+      }
       ctx.restore();
     }
   }
