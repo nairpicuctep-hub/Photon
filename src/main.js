@@ -180,7 +180,21 @@ function rebuildControls(scene, hero) {
 
 // ----- PWA: service worker + install affordance -----------------------------
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
+  // Reload once when a NEW worker takes over (skip the initial install claim),
+  // so a fresh deploy is picked up without the user clearing anything.
+  const hadController = !!navigator.serviceWorker.controller;
+  let reloading = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (reloading || !hadController) return;
+    reloading = true; location.reload();
+  });
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').then((reg) => {
+      reg.update();
+      // re-check for an update whenever the app/tab regains focus
+      document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') reg.update(); });
+    }).catch(() => {});
+  });
 }
 let deferredPrompt = null;
 window.addEventListener('beforeinstallprompt', (e) => {
